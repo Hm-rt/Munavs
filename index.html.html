@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#0a0e1a">
+<title>لوحة قيادة سجل المركبات</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Readex+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+/* =================== المتغيرات والثيمات =================== */
+:root {
+    --bg-primary: #0a0e1a;
+    --bg-secondary: #131829;
+    --bg-card: rgba(20, 27, 45, 0.65);
+    --bg-card-hover: rgba(28, 38, 63, 0.85);
+    --bg-glass: rgba(255, 255, 255, 0.04);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-accent: rgba(212, 175, 55, 0.35);
+
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
+    --text-muted: #475569;
+
+    --gold: #d4af37;
+    --gold-bright: #f7d774;
+    --emerald: #10b981;
+    --emerald-glow: #34d399;
+    --ruby: #ef4444;
+    --ruby-glow: #f87171;
+    --sapphire: #3b82f6;
+    --sapphire-glow: #60a5fa;
+    --amber: #f59e0b;
+    --amber-glow: #fbbf24;
+    --purple: #8b5cf6;
+    --cyan: #06b6d4;
+
+    --shadow-glow: 0 0 40px rgba(212, 175, 55, 0.15);
+    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-strong: 0 12px 48px rgba(0, 0, 0, 0.6);
+
+    --grad-gold: linear-gradient(135deg, #d4af37 0%, #f7d774 100%);
+    --grad-emerald: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    --grad-ruby: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+    --grad-sapphire: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+    --grad-amber: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --grad-purple: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+
+    --font-display: 'Readex Pro', 'IBM Plex Sans Arabic', system-ui;
+    --font-body: 'IBM Plex Sans Arabic', system-ui;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+[data-theme="light"] {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.92);
+    --bg-card-hover: rgba(255, 255, 255, 1);
+    --bg-glass: rgba(15, 23, 42, 0.03);
+    --border-subtle: rgba(15, 23, 42, 0.08);
+    --border-accent: rgba(180, 145, 30, 0.35);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #64748b;
+    --text-muted: #94a3b8;
+
+    --gold: #b8941f;
+    --emerald-glow: #059669;
+    --ruby-glow: #dc2626;
+    --amber-glow: #d97706;
+    --sapphire-glow: #2563eb;
+
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+    --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(at 25% 35%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+        radial-gradient(at 97% 21%, rgba(212, 175, 55, 0.08) 0px, transparent 50%),
+        radial-gradient(at 52% 99%, rgba(239, 68, 68, 0.06) 0px, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+[data-theme="light"] body::before {
+    background:
+        radial-gradient(at 25% 35%, rgba(59, 130, 246, 0.04) 0px, transparent 50%),
+        radial-gradient(at 97% 21%, rgba(212, 175, 55, 0.04) 0px, transparent 50%);
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* =================== الهيدر =================== */
+.header {
+    background: var(--bg-card);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 20px 28px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: var(--shadow-card);
+    position: sticky;
+    top: 10px;
+    z-index: 100;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--grad-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: #0a0e1a;
+    box-shadow: var(--shadow-glow);
+    flex-shrink: 0;
+}
+
+.brand-text h1 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    letter-spacing: -0.4px;
+}
+
+.brand-text p {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-glass);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-accent);
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: var(--grad-gold);
+    color: #0a0e1a;
+    border: none;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 6px 24px rgba(212, 175, 55, 0.45);
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 10px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s;
+    color: var(--text-primary);
+}
+
+.btn-icon:hover {
+    background: var(--bg-card-hover);
+    transform: scale(1.05);
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.status-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--emerald);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* =================== منطقة الرفع =================== */
+.upload-zone {
+    background: var(--bg-card);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 2px dashed var(--border-accent);
+    border-radius: 20px;
+    padding: 40px 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.upload-zone:hover, .upload-zone.dragging {
+    border-color: var(--gold);
+    background: var(--bg-card-hover);
+    transform: scale(1.003);
+}
+
+.upload-zone.has-file {
+    border-color: var(--emerald);
+    background: rgba(16, 185, 129, 0.05);
+    padding: 18px 24px;
+}
+
+.upload-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    background: var(--grad-gold);
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: #0a0e1a;
+    box-shadow: var(--shadow-glow);
+    transition: transform 0.3s;
+}
+
+.upload-zone:hover .upload-icon { transform: translateY(-3px) rotate(-5deg); }
+
+.upload-text-main {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-family: var(--font-display);
+}
+
+.upload-text-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.upload-zone.has-file .upload-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    background: var(--grad-emerald);
+    margin-bottom: 0;
+    display: inline-flex;
+    margin-left: 14px;
+    vertical-align: middle;
+}
+
+.upload-zone.has-file .upload-text-main {
+    display: inline;
+    font-size: 15px;
+}
+
+.upload-zone.has-file .upload-text-sub {
+    display: inline;
+    margin-right: 10px;
+    font-size: 12px;
+}
+
+#fileInput { display: none; }
+
+/* =================== العنوان والأقسام =================== */
+.section { margin-bottom: 28px; animation: fadeInUp 0.5s ease backwards; }
+.section:nth-child(2) { animation-delay: 0.05s; }
+.section:nth-child(3) { animation-delay: 0.1s; }
+.section:nth-child(4) { animation-delay: 0.15s; }
+.section:nth-child(5) { animation-delay: 0.2s; }
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.section-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.3px;
+}
+
+.section-title-bar {
+    width: 4px;
+    height: 26px;
+    background: var(--grad-gold);
+    border-radius: 2px;
+}
+
+.section-subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* =================== مجموعة بطاقات KPI =================== */
+.kpi-group {
+    margin-bottom: 16px;
+}
+
+.kpi-group-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-right: 4px;
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+@media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+}
+
+.kpi-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-card);
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-strong);
+    border-color: var(--border-accent);
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--kpi-accent, var(--grad-gold));
+}
+
+.kpi-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--kpi-icon-bg, rgba(212, 175, 55, 0.12));
+    color: var(--kpi-icon-fg, var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.kpi-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.kpi-value {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+    direction: ltr;
+    text-align: right;
+    line-height: 1.2;
+}
+
+.kpi-value.val-emerald { color: var(--emerald-glow); }
+.kpi-value.val-ruby { color: var(--ruby-glow); }
+.kpi-value.val-gold { color: var(--gold-bright); }
+.kpi-value.val-sapphire { color: var(--sapphire-glow); }
+.kpi-value.val-amber { color: var(--amber-glow); }
+
+.kpi-sub {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.kpi-progress {
+    margin-top: 10px;
+    height: 4px;
+    background: var(--bg-glass);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.kpi-progress-bar {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--kpi-accent, var(--grad-gold));
+    transition: width 0.6s ease;
+}
+
+.kpi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.kpi-badge.good { background: rgba(16, 185, 129, 0.15); color: var(--emerald-glow); }
+.kpi-badge.bad { background: rgba(239, 68, 68, 0.15); color: var(--ruby-glow); }
+.kpi-badge.warn { background: rgba(245, 158, 11, 0.15); color: var(--amber-glow); }
+
+/* =================== الرسوم البيانية =================== */
+.charts-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 1100px) {
+    .charts-row { grid-template-columns: 1fr; }
+}
+
+.charts-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 900px) {
+    .charts-row-3 { grid-template-columns: 1fr; }
+}
+
+.chart-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+}
+
+.chart-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 10px;
+}
+
+.chart-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.chart-meta {
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.chart-canvas-wrapper {
+    position: relative;
+    height: 260px;
+}
+
+.chart-canvas-wrapper.small {
+    height: 220px;
+}
+
+/* =================== الجداول =================== */
+.table-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+}
+
+.tabs-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--bg-glass);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tab-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-glass);
+}
+
+.tab-btn.active {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tab-btn .count-badge {
+    background: var(--bg-glass);
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+}
+
+.tab-btn.active .count-badge {
+    background: var(--gold);
+    color: #0a0e1a;
+}
+
+.table-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-glass);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 13px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: var(--bg-card-hover);
+}
+
+.filter-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-glass);
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-chip:hover {
+    color: var(--text-primary);
+    border-color: var(--border-accent);
+}
+
+.filter-chip.active {
+    background: var(--gold);
+    color: #0a0e1a;
+    border-color: var(--gold);
+    font-weight: 600;
+}
+
+.export-btn {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--emerald);
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--emerald-glow);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.export-btn:hover {
+    background: rgba(16, 185, 129, 0.2);
+    transform: translateY(-1px);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 10px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.table-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
+.table-wrapper::-webkit-scrollbar-track { background: var(--bg-glass); border-radius: 4px; }
+.table-wrapper::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; }
+.table-wrapper::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12.5px;
+}
+
+.data-table thead {
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 2;
+}
+
+.data-table th {
+    padding: 11px 12px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    background: var(--bg-secondary);
+}
+
+.data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.data-table tr:hover td {
+    background: var(--bg-glass);
+}
+
+.data-table .num {
+    font-family: var(--font-mono);
+    direction: ltr;
+    text-align: right;
+    font-size: 12px;
+}
+
+.data-table tr.row-critical td {
+    background: rgba(239, 68, 68, 0.05);
+    border-right: 3px solid var(--ruby);
+}
+
+.data-table tr.row-warning td {
+    background: rgba(245, 158, 11, 0.04);
+    border-right: 3px solid var(--amber);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 9px;
+    border-radius: 7px;
+    font-size: 10.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-success { background: rgba(16, 185, 129, 0.15); color: var(--emerald-glow); }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--amber-glow); }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--ruby-glow); }
+.badge-info { background: rgba(59, 130, 246, 0.15); color: var(--sapphire-glow); }
+.badge-neutral { background: var(--bg-glass); color: var(--text-secondary); }
+.badge-purple { background: rgba(139, 92, 246, 0.15); color: var(--purple); }
+
+.tooltip-trigger {
+    cursor: help;
+    border-bottom: 1px dotted var(--text-muted);
+}
+
+/* =================== التنبيهات =================== */
+.alerts-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.alert-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.alert-card.alert-success { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.06); }
+.alert-card.alert-warning { border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.06); }
+.alert-card.alert-danger { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.06); }
+
+.alert-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.alert-success .alert-icon { background: rgba(16, 185, 129, 0.2); color: var(--emerald-glow); }
+.alert-warning .alert-icon { background: rgba(245, 158, 11, 0.2); color: var(--amber-glow); }
+.alert-danger .alert-icon { background: rgba(239, 68, 68, 0.2); color: var(--ruby-glow); }
+
+.alert-title { font-size: 13px; font-weight: 600; margin-bottom: 1px; }
+.alert-message { font-size: 11px; color: var(--text-secondary); }
+
+/* =================== الحالة الفارغة =================== */
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-secondary);
+}
+
+.empty-state-icon { font-size: 72px; margin-bottom: 18px; opacity: 0.4; }
+.empty-state-text { font-size: 17px; font-weight: 500; margin-bottom: 8px; }
+.empty-state-hint { font-size: 13px; color: var(--text-tertiary); }
+
+/* =================== مساعدات =================== */
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.summary-strip {
+    display: flex;
+    gap: 16px;
+    padding: 12px 16px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    font-size: 12px;
+    flex-wrap: wrap;
+}
+
+.summary-strip-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.summary-strip-label { font-size: 10px; color: var(--text-tertiary); }
+.summary-strip-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* =================== الموبايل =================== */
+@media (max-width: 768px) {
+    .container { padding: 12px; }
+    .header { padding: 16px 18px; }
+    .brand-text h1 { font-size: 16px; }
+    .brand-text p { font-size: 11px; }
+    .brand-logo { width: 44px; height: 44px; font-size: 22px; }
+    .kpi-value { font-size: 20px; }
+    .upload-icon { width: 64px; height: 64px; font-size: 28px; }
+    .upload-text-main { font-size: 16px; }
+    .header-actions { width: 100%; }
+    .btn { font-size: 12px; padding: 8px 12px; }
+}
+
+/* =================== الطباعة =================== */
+@media print {
+    body { background: white; color: black; }
+    .upload-zone, .header-actions, .tabs-nav, .table-controls { display: none !important; }
+    .kpi-card, .chart-card, .table-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- =================== الهيدر =================== -->
+    <div class="header">
+        <div class="brand">
+            <div class="brand-logo">🚛</div>
+            <div class="brand-text">
+                <h1>لوحة قيادة سجل المركبات</h1>
+                <p>متابعة الأسطول، الرخص، والمستحقات المالية</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <span class="status-pill" id="statusPill"><span class="dot"></span> في انتظار رفع الملف</span>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">🔄 تحديث</button>
+            <button class="btn-icon" onclick="toggleTheme()" title="تبديل الوضع">
+                <span id="themeIcon">☀️</span>
+            </button>
+            <button class="btn-icon" onclick="window.print()" title="طباعة">🖨️</button>
+        </div>
+    </div>
+
+    <!-- =================== الرفع =================== -->
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">📤</div>
+        <div class="upload-text-main">اسحب وأفلت ملف سجل المركبات هنا</div>
+        <div class="upload-text-sub">أو اضغط لاختيار الملف من جهازك (.xlsx, .xls)</div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" />
+    </div>
+
+    <!-- =================== المحتوى الرئيسي =================== -->
+    <div id="mainContent" style="display:none;">
+
+        <!-- التنبيهات -->
+        <div class="section">
+            <div class="alerts-row" id="alertsRow"></div>
+        </div>
+
+        <!-- KPIs - الأهم -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-title-bar"></div>
+                    المؤشرات المالية
+                </div>
+                <div class="section-subtitle">ملخص المبالغ والتحصيلات</div>
+            </div>
+            <div class="kpi-grid" id="financialKPIs"></div>
+        </div>
+
+        <!-- KPIs - تشغيلية -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-title-bar" style="background: var(--grad-amber);"></div>
+                    المؤشرات التشغيلية
+                </div>
+                <div class="section-subtitle">حالة الأسطول والوثائق</div>
+            </div>
+            <div class="kpi-grid" id="operationalKPIs"></div>
+        </div>
+
+        <!-- KPIs - جودة البيانات -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-title-bar" style="background: var(--grad-sapphire);"></div>
+                    جودة البيانات
+                </div>
+                <div class="section-subtitle">السجلات الناقصة التي تحتاج إكمال</div>
+            </div>
+            <div class="kpi-grid" id="qualityKPIs"></div>
+        </div>
+
+        <!-- الرسوم البيانية -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-title-bar" style="background: var(--grad-purple);"></div>
+                    تحليلات بصرية
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div>
+                            <div class="chart-title">جدولة انتهاء الرخص</div>
+                            <div class="chart-meta">عدد السيارات في كل شهر</div>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="renewalsChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div>
+                            <div class="chart-title">حالة التحصيل</div>
+                            <div class="chart-meta">من إجمالي المستحقات</div>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="collectionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-row-3">
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div>
+                            <div class="chart-title">توزيع الأسطول حسب الماركة</div>
+                            <div class="chart-meta">أعلى 8 ماركات</div>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper small">
+                        <canvas id="brandsChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div>
+                            <div class="chart-title">توزيع حسب نوع التسجيل</div>
+                            <div class="chart-meta">نقل عام / خاص / غيرها</div>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper small">
+                        <canvas id="regTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- الجدول الرئيسي -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-title-bar"></div>
+                    قاعدة بيانات المركبات
+                </div>
+                <div class="section-subtitle" id="tableSubtitle">114 سيارة</div>
+            </div>
+
+            <div class="table-card">
+                <div class="tabs-nav">
+                    <button class="tab-btn active" data-tab="all" onclick="switchTab('all')">📋 جميع السيارات <span class="count-badge" id="cnt-all">0</span></button>
+                    <button class="tab-btn" data-tab="dues" onclick="switchTab('dues')">💰 عليهم متبقي <span class="count-badge" id="cnt-dues">0</span></button>
+                    <button class="tab-btn" data-tab="expired" onclick="switchTab('expired')">❌ رخصة منتهية <span class="count-badge" id="cnt-expired">0</span></button>
+                    <button class="tab-btn" data-tab="soon" onclick="switchTab('soon')">⏰ تنتهي قريبًا <span class="count-badge" id="cnt-soon">0</span></button>
+                    <button class="tab-btn" data-tab="incomplete" onclick="switchTab('incomplete')">⚠️ بيانات ناقصة <span class="count-badge" id="cnt-incomplete">0</span></button>
+                    <button class="tab-btn" data-tab="inactive" onclick="switchTab('inactive')">🛑 غير نشطة <span class="count-badge" id="cnt-inactive">0</span></button>
+                </div>
+
+                <div class="summary-strip" id="summaryStrip"></div>
+
+                <div class="table-controls">
+                    <input type="text" class="search-input" id="searchInput" placeholder="🔍 ابحث برقم اللوحة، اسم المستخدم، الماركة...">
+                    <button class="export-btn" onclick="exportCurrentTab()">📥 تصدير CSV</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table" id="mainTable"></table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- الحالة الفارغة -->
+    <div id="emptyState" class="empty-state">
+        <div class="empty-state-icon">📂</div>
+        <div class="empty-state-text">ابدأ برفع ملف سجل المركبات</div>
+        <div class="empty-state-hint">يدعم النظام ملفات Excel (.xlsx, .xls) - التواريخ الهجرية تُحوّل تلقائيًا للميلادي</div>
+    </div>
+
+</div>
+
+<script>
+// =================== المتغيرات العامة ===================
+let allCars = [];
+let currentTab = 'all';
+let charts = {};
+const CURRENCY = 'ر.س';
+
+// =================== تحويل التاريخ الهجري للميلادي ===================
+function hijriToGregorian(hy, hm, hd) {
+    try {
+        const jd = Math.floor((11 * hy + 3) / 30) + 354 * hy + 30 * hm - Math.floor((hm - 1) / 2) + hd + 1948440 - 385;
+        let l = jd + 68569;
+        const n = Math.floor((4 * l) / 146097);
+        l = l - Math.floor((146097 * n + 3) / 4);
+        const i = Math.floor((4000 * (l + 1)) / 1461001);
+        l = l - Math.floor((1461 * i) / 4) + 31;
+        const j = Math.floor((80 * l) / 2447);
+        const d = l - Math.floor((2447 * j) / 80);
+        l = Math.floor(j / 11);
+        const m = j + 2 - 12 * l;
+        const y = 100 * (n - 49) + i + l;
+        return new Date(y, m - 1, d);
+    } catch (e) { return null; }
+}
+
+function parseDate(value) {
+    if (value === null || value === undefined || value === '' || value === '-') return null;
+    if (value instanceof Date) return value;
+
+    if (typeof value === 'number') {
+        // Excel serial date
+        const utc_days = Math.floor(value - 25569);
+        return new Date(utc_days * 86400 * 1000);
+    }
+
+    if (typeof value === 'string') {
+        const s = value.trim();
+        const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (m) {
+            const y = parseInt(m[1]), mo = parseInt(m[2]), d = parseInt(m[3]);
+            if (y >= 1300 && y <= 1500) {
+                return hijriToGregorian(y, mo, d);
+            }
+            if (y >= 1990 && y <= 2100) {
+                try { return new Date(y, mo - 1, d); } catch (e) { return null; }
+            }
+        }
+        // Try with time
+        const m2 = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})\s+\d/);
+        if (m2) {
+            const y = parseInt(m2[1]), mo = parseInt(m2[2]), d = parseInt(m2[3]);
+            if (y >= 1990 && y <= 2100) {
+                try { return new Date(y, mo - 1, d); } catch (e) { return null; }
+            }
+        }
+        try {
+            const d = new Date(s);
+            if (!isNaN(d)) return d;
+        } catch (e) {}
+    }
+    return null;
+}
+
+// =================== تنسيق ===================
+function fmt(n, dec = 0) {
+    if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
+    return new Intl.NumberFormat('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(Number(n));
+}
+
+function fmtCurrency(n) {
+    if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
+    return fmt(n) + ' ' + CURRENCY;
+}
+
+function fmtDate(d) {
+    if (!d) return '-';
+    if (!(d instanceof Date) || isNaN(d)) return '-';
+    return d.toISOString().split('T')[0];
+}
+
+function daysBetween(d1, d2) {
+    return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+}
+
+function fmtPhone(p) {
+    if (!p) return null;
+    let s = String(p).replace(/[\s\-\(\)\+]/g, '');
+    if (s.startsWith('966')) s = s.substring(3);
+    if (s.startsWith('00966')) s = s.substring(5);
+    if (s.length === 9 && s.startsWith('5')) return '0' + s;
+    if (s.length === 10 && s.startsWith('05')) return s;
+    if (s === '0' || s === '') return null;
+    return p;
+}
+
+// =================== تبديل الوضع ===================
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    document.getElementById('themeIcon').textContent = next === 'light' ? '🌙' : '☀️';
+    localStorage.setItem('theme', next);
+    if (allCars.length) renderAll();
+}
+
+// تطبيق الثيم المحفوظ
+(function() {
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('themeIcon').textContent = saved === 'light' ? '🌙' : '☀️';
+        });
+    } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+})();
+
+// =================== رفع الملف ===================
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+
+['dragenter', 'dragover'].forEach(evt => {
+    uploadZone.addEventListener(evt, e => {
+        e.preventDefault(); e.stopPropagation();
+        uploadZone.classList.add('dragging');
+    });
+});
+
+['dragleave', 'drop'].forEach(evt => {
+    uploadZone.addEventListener(evt, e => {
+        e.preventDefault(); e.stopPropagation();
+        uploadZone.classList.remove('dragging');
+    });
+});
+
+uploadZone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+});
+
+fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) handleFile(file);
+});
+
+function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array', cellDates: false });
+            parseWorkbook(workbook);
+
+            uploadZone.classList.add('has-file');
+            uploadZone.querySelector('.upload-text-main').textContent = '✓ تم رفع الملف';
+            uploadZone.querySelector('.upload-text-sub').textContent = file.name + ' • ' + allCars.length + ' سيارة';
+
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+
+            const now = new Date();
+            document.getElementById('statusPill').innerHTML =
+                `<span class="dot"></span> آخر تحديث: ${now.toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short' })}`;
+
+            renderAll();
+        } catch (err) {
+            alert('خطأ في قراءة الملف: ' + err.message);
+            console.error(err);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// =================== تحليل البيانات ===================
+function parseWorkbook(workbook) {
+    allCars = [];
+
+    // اختيار أول ورقة
+    const sheetName = workbook.SheetNames[0];
+    const ws = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false, cellDates: false });
+
+    // البحث عن صف الترويسة
+    let headerRow = 0;
+    for (let i = 0; i < Math.min(5, data.length); i++) {
+        const row = data[i];
+        if (row.some(c => String(c).includes('رقم اللوحة') || String(c).includes('اللوحة'))) {
+            headerRow = i;
+            break;
+        }
+    }
+
+    // قراءة البيانات
+    for (let i = headerRow + 1; i < data.length; i++) {
+        const row = data[i];
+        if (!row[1]) continue; // لا رقم لوحة
+
+        const annual = Number(row[16]) || 0;
+        const other = Number(row[17]) || 0;
+        const total = Number(row[18]) || (annual + other);
+        const paid = Number(row[19]) || 0;
+        const discount = Number(row[20]) || 0;
+        const remaining = Number(row[21]) || (total - paid - discount);
+
+        const phoneRaw = row[22];
+        const phone = (phoneRaw && phoneRaw !== 0 && phoneRaw !== '0') ? fmtPhone(phoneRaw) : null;
+
+        const car = {
+            idx: row[0],
+            plate: String(row[1]).trim(),
+            status: String(row[2] || '').trim(),
+            regType: String(row[3] || '').trim(),
+            brand: String(row[4] || '').trim(),
+            model: String(row[5] || '').trim(),
+            year: row[6],
+            serial: row[7],
+            color: String(row[8] || '').trim(),
+            ownershipDateRaw: row[9],
+            ownershipDate: parseDate(row[9]),
+            licenseExpiryRaw: row[10],
+            licenseExpiry: parseDate(row[10]),
+            inspectionExpiryRaw: row[11],
+            inspectionExpiry: parseDate(row[11]),
+            operationCardRaw: row[12],
+            operationCard: parseDate(row[12]),
+            userId: row[13],
+            userName: String(row[14] || '').trim(),
+            annualStartRaw: row[15],
+            annualStart: parseDate(row[15]),
+            annual: annual,
+            other: other,
+            total: total,
+            paid: paid,
+            discount: discount,
+            remaining: remaining,
+            phoneRaw: phoneRaw,
+            phone: phone,
+            sticker: String(row[23] || '').trim(),
+            notes1: String(row[24] || '').trim(),
+            notes2: String(row[25] || '').trim()
+        };
+
+        // تطبيع الحالة
+        if (car.status === 'تعمل') car.statusNormalized = 'active';
+        else if (car.status === 'لا تعمل') car.statusNormalized = 'inactive';
+        else car.statusNormalized = 'unknown';
+
+        // تصنيف المخاطر
+        const today = new Date();
+        car.licenseDays = car.licenseExpiry ? daysBetween(today, car.licenseExpiry) : null;
+        car.inspectionDays = car.inspectionExpiry ? daysBetween(today, car.inspectionExpiry) : null;
+        car.operationDays = car.operationCard ? daysBetween(today, car.operationCard) : null;
+
+        car.hasDues = car.remaining > 0;
+        car.licenseExpired = car.licenseDays !== null && car.licenseDays < 0;
+        car.licenseSoon = car.licenseDays !== null && car.licenseDays >= 0 && car.licenseDays <= 30;
+        car.incomplete = !car.userName || !car.phone;
+
+        allCars.push(car);
+    }
+
+    console.log('Parsed cars:', allCars.length, allCars[0]);
+}
+
+// =================== حسابات ===================
+function computeStats() {
+    const today = new Date();
+
+    const totalCars = allCars.length;
+    const activeCars = allCars.filter(c => c.statusNormalized === 'active').length;
+    const inactiveCars = allCars.filter(c => c.statusNormalized === 'inactive').length;
+
+    const totalAnnual = allCars.reduce((a, c) => a + c.annual, 0);
+    const totalOther = allCars.reduce((a, c) => a + c.other, 0);
+    const totalAmount = allCars.reduce((a, c) => a + c.total, 0);
+    const totalPaid = allCars.reduce((a, c) => a + c.paid, 0);
+    const totalDiscount = allCars.reduce((a, c) => a + c.discount, 0);
+    const totalRemaining = allCars.reduce((a, c) => a + c.remaining, 0);
+
+    const collectionRate = totalAmount > 0 ? totalPaid / totalAmount : 0;
+
+    const carsWithDues = allCars.filter(c => c.hasDues).length;
+    const carsExpired = allCars.filter(c => c.licenseExpired).length;
+    const carsSoon = allCars.filter(c => c.licenseSoon).length;
+
+    const inspectionSoon = allCars.filter(c =>
+        c.inspectionDays !== null && c.inspectionDays >= 0 && c.inspectionDays <= 30
+    ).length;
+    const inspectionExpired = allCars.filter(c =>
+        c.inspectionDays !== null && c.inspectionDays < 0
+    ).length;
+    const operationSoon = allCars.filter(c =>
+        c.operationDays !== null && c.operationDays >= 0 && c.operationDays <= 30
+    ).length;
+    const operationExpired = allCars.filter(c =>
+        c.operationDays !== null && c.operationDays < 0
+    ).length;
+
+    const noPhone = allCars.filter(c => !c.phone).length;
+    const noName = allCars.filter(c => !c.userName).length;
+    const incomplete = allCars.filter(c => c.incomplete).length;
+
+    return {
+        totalCars, activeCars, inactiveCars,
+        totalAnnual, totalOther, totalAmount, totalPaid, totalDiscount, totalRemaining,
+        collectionRate,
+        carsWithDues, carsExpired, carsSoon,
+        inspectionSoon, inspectionExpired, operationSoon, operationExpired,
+        noPhone, noName, incomplete
+    };
+}
+
+// =================== رسم كل شيء ===================
+function renderAll() {
+    const stats = computeStats();
+    renderAlerts(stats);
+    renderFinancialKPIs(stats);
+    renderOperationalKPIs(stats);
+    renderQualityKPIs(stats);
+    renderCharts(stats);
+    renderTabCounts(stats);
+    renderTable();
+}
+
+// =================== التنبيهات ===================
+function renderAlerts(stats) {
+    const alerts = [];
+
+    if (stats.totalRemaining > 0) {
+        alerts.push({
+            type: 'danger',
+            icon: '💰',
+            title: `${fmtCurrency(stats.totalRemaining)} ذمم مدينة`,
+            message: `${stats.carsWithDues} عميل لم يسدد كامل المستحقات`
+        });
+    } else {
+        alerts.push({
+            type: 'success',
+            icon: '✓',
+            title: 'لا توجد ذمم مدينة',
+            message: 'كل العملاء سددوا مستحقاتهم'
+        });
+    }
+
+    if (stats.carsExpired > 0) {
+        alerts.push({
+            type: 'danger',
+            icon: '❌',
+            title: `${stats.carsExpired} رخصة منتهية`,
+            message: 'تواصل مع أصحابها للتجديد فورًا'
+        });
+    } else if (stats.carsSoon > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: '⏰',
+            title: `${stats.carsSoon} رخصة ستنتهي خلال 30 يومًا`,
+            message: 'الوقت مناسب للتواصل الاستباقي'
+        });
+    } else {
+        alerts.push({
+            type: 'success',
+            icon: '✓',
+            title: 'جميع الرخص سارية',
+            message: 'لا توجد رخص قريبة الانتهاء'
+        });
+    }
+
+    if (stats.incomplete > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: '⚠️',
+            title: `${stats.incomplete} سجل ناقص البيانات`,
+            message: `${stats.noPhone} بدون جوال • ${stats.noName} بدون اسم`
+        });
+    } else {
+        alerts.push({
+            type: 'success',
+            icon: '✓',
+            title: 'كل السجلات مكتملة',
+            message: 'الأسماء وأرقام الجوال متوفرة'
+        });
+    }
+
+    document.getElementById('alertsRow').innerHTML = alerts.map(a => `
+        <div class="alert-card alert-${a.type}">
+            <div class="alert-icon">${a.icon}</div>
+            <div>
+                <div class="alert-title">${a.title}</div>
+                <div class="alert-message">${a.message}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// =================== KPIs المالية ===================
+function renderFinancialKPIs(stats) {
+    const kpis = [
+        {
+            icon: '💼',
+            label: 'إجمالي المستحقات السنوية',
+            value: fmtCurrency(stats.totalAmount),
+            sub: `سنوي ${fmtCurrency(stats.totalAnnual)} + أخرى ${fmtCurrency(stats.totalOther)}`,
+            color: 'gold',
+            iconBg: 'rgba(212, 175, 55, 0.12)',
+            iconFg: 'var(--gold)',
+            accent: 'var(--grad-gold)'
+        },
+        {
+            icon: '✅',
+            label: 'إجمالي المُحصَّل',
+            value: fmtCurrency(stats.totalPaid),
+            sub: `نسبة التحصيل ${(stats.collectionRate * 100).toFixed(1)}%`,
+            progress: stats.collectionRate * 100,
+            color: 'emerald',
+            iconBg: 'rgba(16, 185, 129, 0.12)',
+            iconFg: 'var(--emerald-glow)',
+            accent: 'var(--grad-emerald)'
+        },
+        {
+            icon: '⚠️',
+            label: 'إجمالي المتبقي',
+            value: fmtCurrency(stats.totalRemaining),
+            sub: `${stats.carsWithDues} من ${stats.totalCars} عميل`,
+            color: 'ruby',
+            iconBg: 'rgba(239, 68, 68, 0.12)',
+            iconFg: 'var(--ruby-glow)',
+            accent: 'var(--grad-ruby)'
+        },
+        {
+            icon: '🏷️',
+            label: 'إجمالي المخصومات',
+            value: fmtCurrency(stats.totalDiscount),
+            sub: 'خصومات للعملاء',
+            color: 'sapphire',
+            iconBg: 'rgba(59, 130, 246, 0.12)',
+            iconFg: 'var(--sapphire-glow)',
+            accent: 'var(--grad-sapphire)'
+        }
+    ];
+
+    document.getElementById('financialKPIs').innerHTML = kpis.map(k => `
+        <div class="kpi-card" style="--kpi-accent: ${k.accent}; --kpi-icon-bg: ${k.iconBg}; --kpi-icon-fg: ${k.iconFg};">
+            <div class="kpi-icon-wrap">${k.icon}</div>
+            <div class="kpi-label">${k.label}</div>
+            <div class="kpi-value val-${k.color}">${k.value}</div>
+            <div class="kpi-sub"><span>${k.sub}</span></div>
+            ${k.progress !== undefined ? `<div class="kpi-progress"><div class="kpi-progress-bar" style="width: ${k.progress}%;"></div></div>` : ''}
+        </div>
+    `).join('');
+}
+
+// =================== KPIs التشغيلية ===================
+function renderOperationalKPIs(stats) {
+    const kpis = [
+        {
+            icon: '🚛',
+            label: 'إجمالي السيارات',
+            value: fmt(stats.totalCars),
+            sub: `<span class="kpi-badge good">✓ ${stats.activeCars} نشطة</span> ${stats.inactiveCars > 0 ? `<span class="kpi-badge bad">${stats.inactiveCars} متوقفة</span>` : ''}`,
+            color: 'gold',
+            iconBg: 'rgba(212, 175, 55, 0.12)',
+            iconFg: 'var(--gold)',
+            accent: 'var(--grad-gold)'
+        },
+        {
+            icon: '❌',
+            label: 'رخص منتهية',
+            value: fmt(stats.carsExpired),
+            sub: stats.carsExpired > 0 ? 'تحتاج تجديدًا فوريًا' : 'كل الرخص سارية',
+            color: stats.carsExpired > 0 ? 'ruby' : 'emerald',
+            iconBg: stats.carsExpired > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+            iconFg: stats.carsExpired > 0 ? 'var(--ruby-glow)' : 'var(--emerald-glow)',
+            accent: stats.carsExpired > 0 ? 'var(--grad-ruby)' : 'var(--grad-emerald)'
+        },
+        {
+            icon: '⏰',
+            label: 'رخص تنتهي خلال 30 يوم',
+            value: fmt(stats.carsSoon),
+            sub: stats.carsSoon > 0 ? 'تواصل استباقي' : 'لا يوجد قريب',
+            color: stats.carsSoon > 0 ? 'amber' : 'emerald',
+            iconBg: stats.carsSoon > 0 ? 'rgba(245, 158, 11, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+            iconFg: stats.carsSoon > 0 ? 'var(--amber-glow)' : 'var(--emerald-glow)',
+            accent: stats.carsSoon > 0 ? 'var(--grad-amber)' : 'var(--grad-emerald)'
+        },
+        {
+            icon: '🔍',
+            label: 'فحوصات منتهية أو قريبة',
+            value: fmt(stats.inspectionExpired + stats.inspectionSoon),
+            sub: `${stats.inspectionExpired} منتهي • ${stats.inspectionSoon} قريب`,
+            color: (stats.inspectionExpired + stats.inspectionSoon) > 0 ? 'amber' : 'emerald',
+            iconBg: 'rgba(245, 158, 11, 0.12)',
+            iconFg: 'var(--amber-glow)',
+            accent: 'var(--grad-amber)'
+        }
+    ];
+
+    document.getElementById('operationalKPIs').innerHTML = kpis.map(k => `
+        <div class="kpi-card" style="--kpi-accent: ${k.accent}; --kpi-icon-bg: ${k.iconBg}; --kpi-icon-fg: ${k.iconFg};">
+            <div class="kpi-icon-wrap">${k.icon}</div>
+            <div class="kpi-label">${k.label}</div>
+            <div class="kpi-value val-${k.color}">${k.value}</div>
+            <div class="kpi-sub"><span>${k.sub}</span></div>
+        </div>
+    `).join('');
+}
+
+// =================== KPIs جودة البيانات ===================
+function renderQualityKPIs(stats) {
+    const kpis = [
+        {
+            icon: '📞',
+            label: 'سيارات بدون رقم جوال',
+            value: fmt(stats.noPhone),
+            sub: stats.noPhone > 0 ? `${((stats.noPhone / stats.totalCars) * 100).toFixed(0)}% من السجلات` : 'كل الأرقام موجودة',
+            color: stats.noPhone > 0 ? 'amber' : 'emerald',
+            iconBg: 'rgba(245, 158, 11, 0.12)',
+            iconFg: 'var(--amber-glow)',
+            accent: 'var(--grad-amber)'
+        },
+        {
+            icon: '👤',
+            label: 'سيارات بدون اسم مستخدم',
+            value: fmt(stats.noName),
+            sub: stats.noName > 0 ? 'تحتاج إكمال البيانات' : 'كل الأسماء موجودة',
+            color: stats.noName > 0 ? 'amber' : 'emerald',
+            iconBg: 'rgba(245, 158, 11, 0.12)',
+            iconFg: 'var(--amber-glow)',
+            accent: 'var(--grad-amber)'
+        },
+        {
+            icon: '👥',
+            label: 'عملاء عليهم متبقي',
+            value: fmt(stats.carsWithDues),
+            sub: `متوسط المتبقي ${stats.carsWithDues > 0 ? fmtCurrency(stats.totalRemaining / stats.carsWithDues) : '0'}`,
+            color: stats.carsWithDues > 0 ? 'ruby' : 'emerald',
+            iconBg: 'rgba(239, 68, 68, 0.12)',
+            iconFg: 'var(--ruby-glow)',
+            accent: 'var(--grad-ruby)'
+        },
+        {
+            icon: '📊',
+            label: 'نسبة التحصيل الإجمالية',
+            value: (stats.collectionRate * 100).toFixed(1) + '%',
+            sub: `محصّل ${fmtCurrency(stats.totalPaid)} من ${fmtCurrency(stats.totalAmount)}`,
+            progress: stats.collectionRate * 100,
+            color: stats.collectionRate > 0.7 ? 'emerald' : (stats.collectionRate > 0.4 ? 'amber' : 'ruby'),
+            iconBg: 'rgba(139, 92, 246, 0.12)',
+            iconFg: 'var(--purple)',
+            accent: 'var(--grad-purple)'
+        }
+    ];
+
+    document.getElementById('qualityKPIs').innerHTML = kpis.map(k => `
+        <div class="kpi-card" style="--kpi-accent: ${k.accent}; --kpi-icon-bg: ${k.iconBg}; --kpi-icon-fg: ${k.iconFg};">
+            <div class="kpi-icon-wrap">${k.icon}</div>
+            <div class="kpi-label">${k.label}</div>
+            <div class="kpi-value val-${k.color}">${k.value}</div>
+            <div class="kpi-sub"><span>${k.sub}</span></div>
+            ${k.progress !== undefined ? `<div class="kpi-progress"><div class="kpi-progress-bar" style="width: ${k.progress}%;"></div></div>` : ''}
+        </div>
+    `).join('');
+}
+
+// =================== الرسوم البيانية ===================
+function getChartTextColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+}
+
+function getChartGridColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--border-subtle').trim();
+}
+
+function destroyCharts() {
+    Object.values(charts).forEach(c => c && c.destroy());
+    charts = {};
+}
+
+function renderCharts(stats) {
+    destroyCharts();
+    Chart.defaults.font.family = "'IBM Plex Sans Arabic', system-ui";
+    Chart.defaults.color = getChartTextColor();
+
+    // 1. جدولة الرخص
+    const monthsAhead = 12;
+    const monthBuckets = {};
+    const monthLabels = [];
+    const today = new Date();
+
+    // إعداد الدلاء
+    for (let i = -3; i < monthsAhead; i++) {
+        const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        monthBuckets[key] = { renewals: 0, expired: 0 };
+        monthLabels.push({ key, label: d.toLocaleDateString('ar-SA', { month: 'short', year: '2-digit' }), date: d });
+    }
+
+    allCars.forEach(c => {
+        if (!c.licenseExpiry) return;
+        const key = `${c.licenseExpiry.getFullYear()}-${String(c.licenseExpiry.getMonth() + 1).padStart(2, '0')}`;
+        if (monthBuckets[key]) {
+            if (c.licenseExpired) monthBuckets[key].expired++;
+            else monthBuckets[key].renewals++;
+        }
+    });
+
+    charts.renewals = new Chart(document.getElementById('renewalsChart'), {
+        type: 'bar',
+        data: {
+            labels: monthLabels.map(m => m.label),
+            datasets: [
+                {
+                    label: 'منتهية',
+                    data: monthLabels.map(m => monthBuckets[m.key].expired),
+                    backgroundColor: 'rgba(239, 68, 68, 0.75)',
+                    borderRadius: 6,
+                    stack: 'a'
+                },
+                {
+                    label: 'قادمة',
+                    data: monthLabels.map(m => monthBuckets[m.key].renewals),
+                    backgroundColor: 'rgba(212, 175, 55, 0.75)',
+                    borderRadius: 6,
+                    stack: 'a'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { boxWidth: 12, padding: 10, font: { size: 11 } } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y} سيارة`
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, stacked: true, ticks: { font: { size: 10 } } },
+                y: { grid: { color: getChartGridColor() }, stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+            }
+        }
+    });
+
+    // 2. التحصيل (دائري)
+    const remainingPositive = Math.max(0, stats.totalRemaining);
+    charts.collection = new Chart(document.getElementById('collectionChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['مُحصَّل', 'متبقي', 'مخصوم'],
+            datasets: [{
+                data: [stats.totalPaid, remainingPositive, stats.totalDiscount],
+                backgroundColor: ['#10b981', '#ef4444', '#3b82f6'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 12 } } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.label}: ${fmtCurrency(ctx.parsed)} (${((ctx.parsed / stats.totalAmount) * 100).toFixed(1)}%)`
+                    }
+                }
+            }
+        }
+    });
+
+    // 3. الماركات
+    const brandCounts = {};
+    allCars.forEach(c => {
+        if (!c.brand) return;
+        brandCounts[c.brand] = (brandCounts[c.brand] || 0) + 1;
+    });
+    const sortedBrands = Object.entries(brandCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    charts.brands = new Chart(document.getElementById('brandsChart'), {
+        type: 'bar',
+        data: {
+            labels: sortedBrands.map(b => b[0]),
+            datasets: [{
+                label: 'العدد',
+                data: sortedBrands.map(b => b[1]),
+                backgroundColor: [
+                    '#d4af37', '#3b82f6', '#10b981', '#f97316',
+                    '#8b5cf6', '#ef4444', '#06b6d4', '#f59e0b'
+                ],
+                borderRadius: 6,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.parsed.x} سيارة`
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { color: getChartGridColor() }, beginAtZero: true, ticks: { precision: 0 } },
+                y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            }
+        }
+    });
+
+    // 4. نوع التسجيل
+    const regCounts = {};
+    allCars.forEach(c => {
+        const t = c.regType || 'غير محدد';
+        regCounts[t] = (regCounts[t] || 0) + 1;
+    });
+
+    charts.regType = new Chart(document.getElementById('regTypeChart'), {
+        type: 'pie',
+        data: {
+            labels: Object.keys(regCounts),
+            datasets: [{
+                data: Object.values(regCounts),
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 12 } } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.label}: ${ctx.parsed} سيارة (${((ctx.parsed / stats.totalCars) * 100).toFixed(1)}%)`
+                    }
+                }
+            }
+        }
+    });
+}
+
+// =================== التابز والجدول ===================
+function renderTabCounts(stats) {
+    document.getElementById('cnt-all').textContent = stats.totalCars;
+    document.getElementById('cnt-dues').textContent = stats.carsWithDues;
+    document.getElementById('cnt-expired').textContent = stats.carsExpired;
+    document.getElementById('cnt-soon').textContent = stats.carsSoon;
+    document.getElementById('cnt-incomplete').textContent = stats.incomplete;
+    document.getElementById('cnt-inactive').textContent = stats.inactiveCars;
+}
+
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tab);
+    });
+    document.getElementById('searchInput').value = '';
+    renderTable();
+}
+
+function getFilteredCars() {
+    let cars = [...allCars];
+    const term = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+    if (currentTab === 'dues') cars = cars.filter(c => c.hasDues);
+    else if (currentTab === 'expired') cars = cars.filter(c => c.licenseExpired);
+    else if (currentTab === 'soon') cars = cars.filter(c => c.licenseSoon);
+    else if (currentTab === 'incomplete') cars = cars.filter(c => c.incomplete);
+    else if (currentTab === 'inactive') cars = cars.filter(c => c.statusNormalized === 'inactive');
+
+    if (term) {
+        cars = cars.filter(c => {
+            return (c.plate || '').toLowerCase().includes(term) ||
+                   (c.userName || '').toLowerCase().includes(term) ||
+                   (c.brand || '').toLowerCase().includes(term) ||
+                   (c.model || '').toLowerCase().includes(term) ||
+                   (c.phone || '').toLowerCase().includes(term) ||
+                   String(c.userId || '').toLowerCase().includes(term);
+        });
+    }
+    return cars;
+}
+
+function statusBadge(status) {
+    if (status === 'تعمل') return `<span class="badge badge-success">✓ ${status}</span>`;
+    if (status === 'لا تعمل') return `<span class="badge badge-danger">${status}</span>`;
+    if (status === 'غير مصنف') return `<span class="badge badge-neutral">${status}</span>`;
+    return status ? `<span class="badge badge-neutral">${status}</span>` : '-';
+}
+
+function licenseStatusBadge(c) {
+    if (!c.licenseExpiry) return '<span class="badge badge-neutral">-</span>';
+    if (c.licenseExpired) return `<span class="badge badge-danger">❌ منتهية (${Math.abs(c.licenseDays)} يوم)</span>`;
+    if (c.licenseSoon) return `<span class="badge badge-warning">⏰ ${c.licenseDays} يوم</span>`;
+    return `<span class="badge badge-success">✓ ${c.licenseDays} يوم</span>`;
+}
+
+function dateWithTooltip(rawValue, parsedDate) {
+    if (!parsedDate) return '<span style="color:var(--text-muted);">-</span>';
+    const greg = fmtDate(parsedDate);
+    const isHijri = typeof rawValue === 'string' && /^1[3-4]\d{2}-/.test(rawValue.trim());
+    if (isHijri) {
+        return `<span class="tooltip-trigger" title="الأصل هجري: ${rawValue}">${greg}</span>`;
+    }
+    return greg;
+}
+
+function renderTable() {
+    const cars = getFilteredCars();
+
+    // الشريط الإحصائي
+    const stripData = [
+        { label: 'العدد', value: fmt(cars.length) },
+        { label: 'إجمالي المستحق', value: fmtCurrency(cars.reduce((a, c) => a + c.total, 0)) },
+        { label: 'المُحصَّل', value: fmtCurrency(cars.reduce((a, c) => a + c.paid, 0)) },
+        { label: 'المتبقي', value: fmtCurrency(cars.reduce((a, c) => a + c.remaining, 0)) }
+    ];
+    document.getElementById('summaryStrip').innerHTML = stripData.map(s => `
+        <div class="summary-strip-item">
+            <span class="summary-strip-label">${s.label}</span>
+            <span class="summary-strip-value">${s.value}</span>
+        </div>
+    `).join('');
+
+    document.getElementById('tableSubtitle').textContent = `عرض ${cars.length} من ${allCars.length} سيارة`;
+
+    if (cars.length === 0) {
+        document.getElementById('mainTable').innerHTML = `
+            <thead><tr><th>لا توجد نتائج</th></tr></thead>
+            <tbody><tr><td style="text-align:center; padding: 40px; color: var(--text-tertiary);">لا توجد سيارات تطابق المعايير</td></tr></tbody>
+        `;
+        return;
+    }
+
+    const html = `
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اللوحة</th>
+                <th>المستخدم</th>
+                <th>الجوال</th>
+                <th>الماركة / الطراز</th>
+                <th>التسجيل</th>
+                <th>الحالة</th>
+                <th>انتهاء الرخصة</th>
+                <th>حالة الرخصة</th>
+                <th>السنوي</th>
+                <th>أخرى</th>
+                <th>المدفوع</th>
+                <th>المتبقي</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${cars.map((c, i) => {
+                let rowClass = '';
+                if (c.licenseExpired) rowClass = 'row-critical';
+                else if (c.licenseSoon || c.hasDues) rowClass = 'row-warning';
+
+                return `
+                <tr class="${rowClass}">
+                    <td>${i + 1}</td>
+                    <td><strong>${c.plate}</strong></td>
+                    <td>${c.userName || '<span style="color:var(--ruby-glow); font-size: 11px;">⚠ فارغ</span>'}</td>
+                    <td><span class="num">${c.phone || '<span style="color:var(--amber-glow); font-size: 11px;">⚠ -</span>'}</span></td>
+                    <td>${c.brand}${c.model ? ' / ' + c.model : ''}</td>
+                    <td>${c.regType ? `<span class="badge badge-info">${c.regType}</span>` : '-'}</td>
+                    <td>${statusBadge(c.status)}</td>
+                    <td>${dateWithTooltip(c.licenseExpiryRaw, c.licenseExpiry)}</td>
+                    <td>${licenseStatusBadge(c)}</td>
+                    <td class="num">${fmt(c.annual)}</td>
+                    <td class="num">${fmt(c.other)}</td>
+                    <td class="num" style="color: var(--emerald-glow);">${fmt(c.paid)}</td>
+                    <td class="num"><strong style="color: ${c.remaining > 0 ? 'var(--ruby-glow)' : 'inherit'};">${fmt(c.remaining)}</strong></td>
+                </tr>
+            `;}).join('')}
+        </tbody>
+    `;
+    document.getElementById('mainTable').innerHTML = html;
+}
+
+document.getElementById('searchInput').addEventListener('input', renderTable);
+
+// =================== التصدير ===================
+function exportCurrentTab() {
+    const cars = getFilteredCars();
+    if (cars.length === 0) {
+        alert('لا توجد بيانات للتصدير');
+        return;
+    }
+
+    const headers = ['رقم اللوحة', 'اسم المستخدم', 'الجوال', 'الماركة', 'الطراز',
+                     'نوع التسجيل', 'الحالة', 'انتهاء الرخصة', 'الأيام المتبقية',
+                     'السنوي', 'أخرى', 'المجموع', 'المدفوع', 'المخصوم', 'المتبقي'];
+
+    const rows = cars.map(c => [
+        c.plate,
+        c.userName || '',
+        c.phone || '',
+        c.brand,
+        c.model,
+        c.regType,
+        c.status,
+        fmtDate(c.licenseExpiry),
+        c.licenseDays !== null ? c.licenseDays : '',
+        c.annual,
+        c.other,
+        c.total,
+        c.paid,
+        c.discount,
+        c.remaining
+    ]);
+
+    let csv = '\uFEFF' + headers.join(',') + '\n';  // BOM للعربي
+    rows.forEach(r => {
+        csv += r.map(v => {
+            const s = String(v == null ? '' : v);
+            return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
+        }).join(',') + '\n';
+    });
+
+    const tabNames = {
+        all: 'جميع_السيارات',
+        dues: 'العملاء_عليهم_متبقي',
+        expired: 'رخص_منتهية',
+        soon: 'رخص_تنتهي_قريبا',
+        incomplete: 'بيانات_ناقصة',
+        inactive: 'سيارات_غير_نشطة'
+    };
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${tabNames[currentTab] || 'export'}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// =================== اختصارات لوحة المفاتيح ===================
+document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + F → بحث
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f' && allCars.length > 0) {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+    }
+    // Escape → مسح البحث
+    if (e.key === 'Escape') {
+        const inp = document.getElementById('searchInput');
+        if (inp === document.activeElement) {
+            inp.value = '';
+            inp.blur();
+            renderTable();
+        }
+    }
+});
+
+console.log('✓ لوحة قيادة سجل المركبات جاهزة');
+</script>
+
+</body>
+</html>
