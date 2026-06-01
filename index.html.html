@@ -1,0 +1,4114 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#0a0e1a">
+<title>لوحة قيادة المركبات والطلبات</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Readex+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+:root {
+    --bg-primary: #0a0e1a;
+    --bg-secondary: #131829;
+    --bg-card: rgba(20, 27, 45, 0.65);
+    --bg-card-hover: rgba(28, 38, 63, 0.85);
+    --bg-glass: rgba(255, 255, 255, 0.04);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-accent: rgba(212, 175, 55, 0.35);
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
+    --text-muted: #475569;
+    --gold: #d4af37;
+    --gold-bright: #f7d774;
+    --emerald: #10b981;
+    --emerald-glow: #34d399;
+    --ruby: #ef4444;
+    --ruby-glow: #f87171;
+    --sapphire: #3b82f6;
+    --sapphire-glow: #60a5fa;
+    --amber: #f59e0b;
+    --amber-glow: #fbbf24;
+    --purple: #8b5cf6;
+    --purple-glow: #a78bfa;
+    --cyan: #06b6d4;
+    --cyan-glow: #22d3ee;
+    --pink: #ec4899;
+    --pink-glow: #f472b6;
+    --shadow-glow: 0 0 40px rgba(212, 175, 55, 0.15);
+    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-strong: 0 12px 48px rgba(0, 0, 0, 0.6);
+    --grad-gold: linear-gradient(135deg, #d4af37 0%, #f7d774 100%);
+    --grad-emerald: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    --grad-ruby: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+    --grad-sapphire: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+    --grad-amber: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --grad-purple: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+    --grad-cyan: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
+    --grad-pink: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+    --font-display: 'Readex Pro', 'IBM Plex Sans Arabic', system-ui;
+    --font-body: 'IBM Plex Sans Arabic', system-ui;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+[data-theme="light"] {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.92);
+    --bg-card-hover: rgba(255, 255, 255, 1);
+    --bg-glass: rgba(15, 23, 42, 0.03);
+    --border-subtle: rgba(15, 23, 42, 0.08);
+    --border-accent: rgba(180, 145, 30, 0.35);
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #64748b;
+    --text-muted: #94a3b8;
+    --gold: #b8941f;
+    --emerald-glow: #059669;
+    --ruby-glow: #dc2626;
+    --amber-glow: #d97706;
+    --sapphire-glow: #2563eb;
+    --purple-glow: #7c3aed;
+    --cyan-glow: #0891b2;
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+    --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(at 25% 35%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+        radial-gradient(at 97% 21%, rgba(212, 175, 55, 0.08) 0px, transparent 50%),
+        radial-gradient(at 52% 99%, rgba(239, 68, 68, 0.06) 0px, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+[data-theme="light"] body::before {
+    background:
+        radial-gradient(at 25% 35%, rgba(59, 130, 246, 0.04) 0px, transparent 50%),
+        radial-gradient(at 97% 21%, rgba(212, 175, 55, 0.04) 0px, transparent 50%);
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ============ الهيدر ============ */
+.header {
+    background: var(--bg-card);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 20px 28px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: var(--shadow-card);
+    position: sticky;
+    top: 10px;
+    z-index: 100;
+}
+
+.brand { display: flex; align-items: center; gap: 14px; }
+
+.brand-logo {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: var(--grad-gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; color: #0a0e1a;
+    box-shadow: var(--shadow-glow);
+    flex-shrink: 0;
+}
+
+.brand-text h1 {
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: 700;
+    margin-bottom: 2px;
+    letter-spacing: -0.4px;
+}
+
+.brand-text p { font-size: 12px; color: var(--text-secondary); }
+
+.header-actions {
+    display: flex; gap: 10px;
+    align-items: center; flex-wrap: wrap;
+}
+
+.btn {
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-glass);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center; gap: 6px;
+    white-space: nowrap;
+}
+
+.btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-accent);
+    transform: translateY(-1px);
+}
+
+.btn-icon {
+    width: 40px; height: 40px;
+    padding: 0;
+    border-radius: 10px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s;
+    color: var(--text-primary);
+}
+
+.btn-icon:hover {
+    background: var(--bg-card-hover);
+    transform: scale(1.05);
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center; gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.status-pill .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--emerald);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ============ منطقة الرفع ============ */
+.upload-zone {
+    background: var(--bg-card);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 2px dashed var(--border-accent);
+    border-radius: 20px;
+    padding: 40px 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-zone:hover, .upload-zone.dragging {
+    border-color: var(--gold);
+    background: var(--bg-card-hover);
+}
+
+.upload-zone.has-file {
+    border-color: var(--emerald);
+    background: rgba(16, 185, 129, 0.05);
+    padding: 18px 24px;
+}
+
+.upload-icon {
+    width: 72px; height: 72px;
+    border-radius: 18px;
+    background: var(--grad-gold);
+    margin: 0 auto 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; color: #0a0e1a;
+    box-shadow: var(--shadow-glow);
+    transition: transform 0.3s;
+}
+
+.upload-zone:hover .upload-icon { transform: translateY(-3px) rotate(-5deg); }
+
+.upload-text-main {
+    font-size: 18px; font-weight: 600;
+    margin-bottom: 6px;
+    font-family: var(--font-display);
+}
+
+.upload-text-sub { font-size: 13px; color: var(--text-secondary); }
+
+.upload-zone.has-file .upload-icon {
+    width: 44px; height: 44px;
+    font-size: 20px;
+    background: var(--grad-emerald);
+    margin-bottom: 0;
+    display: inline-flex;
+    margin-left: 14px;
+    vertical-align: middle;
+}
+
+.upload-zone.has-file .upload-text-main { display: inline; font-size: 15px; }
+.upload-zone.has-file .upload-text-sub { display: inline; margin-right: 10px; font-size: 12px; }
+
+#fileInput { display: none; }
+
+/* ============ التابز الرئيسية ============ */
+.main-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-glass);
+    padding: 5px;
+    border-radius: 14px;
+    border: 1px solid var(--border-subtle);
+    margin-bottom: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.main-tab {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.main-tab:hover {
+    color: var(--text-primary);
+    background: var(--bg-glass);
+}
+
+.main-tab.active {
+    background: var(--grad-gold);
+    color: #0a0e1a;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+}
+
+.main-tab-content { display: none; }
+.main-tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============ الأقسام ============ */
+.section { margin-bottom: 28px; animation: fadeInUp 0.5s ease backwards; }
+.section:nth-child(2) { animation-delay: 0.05s; }
+.section:nth-child(3) { animation-delay: 0.1s; }
+.section:nth-child(4) { animation-delay: 0.15s; }
+.section:nth-child(5) { animation-delay: 0.2s; }
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.section-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.3px;
+}
+
+.section-title-bar {
+    width: 4px; height: 26px;
+    background: var(--grad-gold);
+    border-radius: 2px;
+}
+
+.section-subtitle { font-size: 12px; color: var(--text-secondary); }
+
+/* ============ KPIs ============ */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.kpi-grid-6 {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+}
+
+.kpi-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+@media (max-width: 1400px) {
+    .kpi-grid-6 { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 1100px) {
+    .kpi-grid, .kpi-grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .kpi-grid-6 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+    .kpi-grid, .kpi-grid-3, .kpi-grid-6 { grid-template-columns: 1fr; }
+}
+
+.kpi-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-card);
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-strong);
+    border-color: var(--border-accent);
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 100%; height: 3px;
+    background: var(--kpi-accent, var(--grad-gold));
+}
+
+.kpi-card.kpi-highlight {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, var(--bg-card) 60%);
+    border-color: rgba(212, 175, 55, 0.3);
+    box-shadow: 0 4px 24px rgba(212, 175, 55, 0.15);
+}
+
+.kpi-card.kpi-highlight::before { height: 4px; }
+.kpi-card.kpi-highlight .kpi-value { font-size: 26px; }
+
+.kpi-icon-wrap {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--kpi-icon-bg, rgba(212, 175, 55, 0.12));
+    color: var(--kpi-icon-fg, var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.kpi-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.kpi-value {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+    direction: ltr;
+    text-align: right;
+    line-height: 1.2;
+}
+
+.kpi-value.val-emerald { color: var(--emerald-glow); }
+.kpi-value.val-ruby { color: var(--ruby-glow); }
+.kpi-value.val-gold { color: var(--gold-bright); }
+.kpi-value.val-sapphire { color: var(--sapphire-glow); }
+.kpi-value.val-amber { color: var(--amber-glow); }
+.kpi-value.val-purple { color: var(--purple-glow); }
+.kpi-value.val-cyan { color: var(--cyan-glow); }
+
+.kpi-sub {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.kpi-progress {
+    margin-top: 10px;
+    height: 4px;
+    background: var(--bg-glass);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.kpi-progress-bar {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--kpi-accent, var(--grad-gold));
+    transition: width 0.6s ease;
+}
+
+.kpi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.kpi-badge.good { background: rgba(16, 185, 129, 0.15); color: var(--emerald-glow); }
+.kpi-badge.bad { background: rgba(239, 68, 68, 0.15); color: var(--ruby-glow); }
+.kpi-badge.warn { background: rgba(245, 158, 11, 0.15); color: var(--amber-glow); }
+
+/* ============ التنبيهات ============ */
+.alerts-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.alert-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.alert-card.alert-success { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.06); }
+.alert-card.alert-warning { border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.06); }
+.alert-card.alert-danger { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.06); }
+
+.alert-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.alert-success .alert-icon { background: rgba(16, 185, 129, 0.2); color: var(--emerald-glow); }
+.alert-warning .alert-icon { background: rgba(245, 158, 11, 0.2); color: var(--amber-glow); }
+.alert-danger .alert-icon { background: rgba(239, 68, 68, 0.2); color: var(--ruby-glow); }
+
+.alert-title { font-size: 13px; font-weight: 600; margin-bottom: 1px; }
+.alert-message { font-size: 11px; color: var(--text-secondary); }
+
+/* ============ الرسوم البيانية ============ */
+.charts-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 1100px) {
+    .charts-row { grid-template-columns: 1fr; }
+}
+
+.charts-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 900px) {
+    .charts-row-2 { grid-template-columns: 1fr; }
+}
+
+.chart-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+}
+
+.chart-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 10px;
+}
+
+.chart-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.chart-meta { font-size: 11px; color: var(--text-tertiary); }
+
+.chart-canvas-wrapper {
+    position: relative;
+    height: 260px;
+}
+
+.chart-canvas-wrapper.small { height: 220px; }
+
+/* ============ الجداول ============ */
+.table-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+}
+
+.tabs-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--bg-glass);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tab-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tab-btn:hover { color: var(--text-primary); background: var(--bg-glass); }
+
+.tab-btn.active {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tab-btn .count-badge {
+    background: var(--bg-glass);
+    padding: 1px 7px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+}
+
+.tab-btn.active .count-badge {
+    background: var(--gold);
+    color: #0a0e1a;
+}
+
+.table-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-glass);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 13px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: var(--bg-card-hover);
+}
+
+.export-btn {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--emerald);
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--emerald-glow);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.export-btn:hover { background: rgba(16, 185, 129, 0.2); transform: translateY(-1px); }
+
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 10px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.table-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
+.table-wrapper::-webkit-scrollbar-track { background: var(--bg-glass); border-radius: 4px; }
+.table-wrapper::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; }
+.table-wrapper::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12.5px;
+}
+
+.data-table thead {
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 2;
+}
+
+.data-table th {
+    padding: 11px 12px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    background: var(--bg-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.data-table th:hover { color: var(--gold); }
+
+.data-table th.sortable::after {
+    content: ' ⇅';
+    opacity: 0.3;
+    font-size: 10px;
+}
+
+.data-table th.sort-asc::after { content: ' ↑'; opacity: 1; color: var(--gold); }
+.data-table th.sort-desc::after { content: ' ↓'; opacity: 1; color: var(--gold); }
+
+.data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.data-table tr:hover td { background: var(--bg-glass); }
+
+.data-table .num {
+    font-family: var(--font-mono);
+    direction: ltr;
+    text-align: right;
+    font-size: 12px;
+}
+
+.data-table tr.row-critical td {
+    background: rgba(239, 68, 68, 0.05);
+    border-right: 3px solid var(--ruby);
+}
+
+.data-table tr.row-warning td {
+    background: rgba(245, 158, 11, 0.04);
+    border-right: 3px solid var(--amber);
+}
+
+.data-table tr.clickable { cursor: pointer; }
+.data-table tr.clickable:hover td { background: var(--bg-card-hover); }
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 9px;
+    border-radius: 7px;
+    font-size: 10.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-success { background: rgba(16, 185, 129, 0.15); color: var(--emerald-glow); }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--amber-glow); }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--ruby-glow); }
+.badge-info { background: rgba(59, 130, 246, 0.15); color: var(--sapphire-glow); }
+.badge-neutral { background: var(--bg-glass); color: var(--text-secondary); }
+.badge-purple { background: rgba(139, 92, 246, 0.15); color: var(--purple-glow); }
+.badge-cyan { background: rgba(6, 182, 212, 0.15); color: var(--cyan-glow); }
+
+.summary-strip {
+    display: flex;
+    gap: 16px;
+    padding: 12px 16px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    font-size: 12px;
+    flex-wrap: wrap;
+}
+
+.summary-strip-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.summary-strip-label { font-size: 10px; color: var(--text-tertiary); }
+.summary-strip-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.tooltip-trigger {
+    cursor: help;
+    border-bottom: 1px dotted var(--text-muted);
+}
+
+/* ============ Modal تفاصيل السيارة ============ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 28px;
+    max-width: 900px;
+    width: 100%;
+    box-shadow: var(--shadow-strong);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.modal-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.modal-close {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-glass);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 20px;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: var(--ruby);
+    color: white;
+    border-color: var(--ruby);
+}
+
+.modal-section {
+    margin-bottom: 24px;
+}
+
+.modal-section-title {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    padding-right: 8px;
+    border-right: 3px solid var(--gold);
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .detail-grid { grid-template-columns: 1fr; }
+}
+
+.detail-item {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.detail-label {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.detail-value.num {
+    font-family: var(--font-mono);
+    direction: ltr;
+    text-align: right;
+}
+
+/* ============ الحالة الفارغة ============ */
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-secondary);
+}
+
+.empty-state-icon { font-size: 72px; margin-bottom: 18px; opacity: 0.4; }
+.empty-state-text { font-size: 17px; font-weight: 500; margin-bottom: 8px; }
+.empty-state-hint { font-size: 13px; color: var(--text-tertiary); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+/* ============ موبايل ============ */
+@media (max-width: 768px) {
+    .container { padding: 12px; }
+    .header { padding: 16px 18px; }
+    .brand-text h1 { font-size: 16px; }
+    .brand-text p { font-size: 11px; }
+    .brand-logo { width: 44px; height: 44px; font-size: 22px; }
+    .kpi-value { font-size: 20px; }
+    .upload-icon { width: 64px; height: 64px; font-size: 28px; }
+    .upload-text-main { font-size: 16px; }
+    .header-actions { width: 100%; }
+    .btn { font-size: 12px; padding: 8px 12px; }
+}
+
+/* ============ المساعد الذكي ============ */
+.ai-assistant {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.08) 50%, rgba(212, 175, 55, 0.08) 100%);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-assistant::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent);
+    pointer-events: none;
+}
+
+.ai-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    position: relative;
+    z-index: 1;
+}
+
+.ai-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #d4af37 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+    animation: aiPulse 3s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes aiPulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4); }
+    50% { box-shadow: 0 4px 30px rgba(139, 92, 246, 0.7); }
+}
+
+.ai-title-block { flex: 1; min-width: 0; }
+
+.ai-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.ai-subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.ai-suggestions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+}
+
+.ai-suggestion {
+    padding: 7px 13px;
+    border-radius: 8px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    background: rgba(139, 92, 246, 0.08);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.ai-suggestion:hover {
+    background: rgba(139, 92, 246, 0.18);
+    border-color: rgba(139, 92, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.ai-input-row {
+    display: flex;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.ai-input {
+    flex: 1;
+    padding: 12px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+}
+
+.ai-input:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+.ai-send-btn {
+    padding: 12px 22px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+    color: white;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.ai-send-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+.ai-response {
+    margin-top: 16px;
+    padding: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: all 0.4s ease;
+}
+
+.ai-response.active {
+    max-height: 1000px;
+    opacity: 1;
+    padding: 18px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+}
+
+.ai-response-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.ai-response-content {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-primary);
+}
+
+.ai-response-content .ai-stat {
+    display: inline-block;
+    padding: 4px 10px;
+    margin: 0 2px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(139, 92, 246, 0.15));
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    direction: ltr;
+}
+
+.ai-response-content .ai-list {
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ai-response-content .ai-list li {
+    padding: 8px 12px;
+    margin: 4px 0;
+    background: var(--bg-glass);
+    border-radius: 8px;
+    border-right: 3px solid var(--purple);
+    font-size: 13px;
+}
+
+.ai-thinking {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--purple-glow);
+    font-size: 13px;
+}
+
+.ai-thinking-dots {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.ai-thinking-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--purple);
+    animation: thinkingDot 1.4s ease-in-out infinite;
+}
+
+.ai-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.ai-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes thinkingDot {
+    0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+    30% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ============ توزيع الأرباح ============ */
+.settlement-hero {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 20px;
+    padding: 28px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.settlement-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 40%, rgba(139, 92, 246, 0.1), transparent 50%);
+    pointer-events: none;
+}
+
+.settlement-hero-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+.settlement-hero-value {
+    font-family: var(--font-mono);
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    direction: ltr;
+    position: relative;
+    z-index: 1;
+}
+
+.settlement-hero-value.balanced { color: var(--emerald-glow); }
+.settlement-hero-value.due { color: var(--amber-glow); }
+.settlement-hero-value.overpaid { color: var(--ruby-glow); }
+
+.settlement-hero-status {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    position: relative;
+    z-index: 1;
+}
+
+.partners-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 900px) {
+    .partners-grid { grid-template-columns: 1fr; }
+}
+
+.partner-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.partner-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-strong);
+}
+
+.partner-card.partner-m {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, var(--bg-card) 60%);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.partner-card.partner-h {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, var(--bg-card) 60%);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.partner-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.partner-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.partner-m .partner-avatar {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    color: white;
+}
+
+.partner-h .partner-avatar {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: white;
+}
+
+.partner-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.partner-role {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.partner-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.partner-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--bg-glass);
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.partner-row.highlight {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(139, 92, 246, 0.1));
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.partner-row-label { color: var(--text-secondary); font-size: 12px; }
+
+.partner-row-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    direction: ltr;
+    font-size: 14px;
+}
+
+.partner-row.highlight .partner-row-value {
+    font-size: 16px;
+    color: var(--gold-bright);
+}
+
+.partner-balance {
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+}
+
+.partner-balance-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.partner-balance-value {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 700;
+    direction: ltr;
+}
+
+.partner-balance-value.positive { color: var(--emerald-glow); }
+.partner-balance-value.negative { color: var(--ruby-glow); }
+
+.partner-balance-note {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 6px;
+}
+
+.settlement-table-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+    overflow-x: auto;
+}
+
+.settlement-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+}
+
+.settlement-table th {
+    padding: 12px 14px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    background: var(--bg-glass);
+}
+
+.settlement-table th.col-m { color: var(--sapphire-glow); }
+.settlement-table th.col-h { color: var(--amber-glow); }
+
+.settlement-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.settlement-table tr.section-header td {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), transparent);
+    font-weight: 700;
+    color: var(--purple-glow);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.settlement-table tr.highlight-row td {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), transparent);
+    font-weight: 700;
+    color: var(--gold-bright);
+}
+
+.settlement-table .col-m-bg { background: rgba(59, 130, 246, 0.04); }
+.settlement-table .col-h-bg { background: rgba(245, 158, 11, 0.04); }
+
+.settlement-table .num {
+    font-family: var(--font-mono);
+    direction: ltr;
+    text-align: right;
+}
+
+@media print {
+    body { background: white; color: black; }
+    .upload-zone, .header-actions, .tabs-nav, .table-controls, .main-tabs { display: none !important; }
+    .kpi-card, .chart-card, .table-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- الهيدر -->
+    <div class="header">
+        <div class="brand">
+            <div class="brand-logo">🚛</div>
+            <div class="brand-text">
+                <h1>لوحة قيادة المركبات والطلبات</h1>
+                <p>نظام إدارة الأسطول والطلبات المالية</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <span class="status-pill" id="statusPill"><span class="dot"></span> في انتظار رفع الملف</span>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">🔄 تحديث</button>
+            <button class="btn-icon" onclick="toggleTheme()" title="تبديل الوضع">
+                <span id="themeIcon">☀️</span>
+            </button>
+            <button class="btn-icon" onclick="window.print()" title="طباعة">🖨️</button>
+        </div>
+    </div>
+
+    <!-- منطقة الرفع -->
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">📤</div>
+        <div class="upload-text-main">اسحب وأفلت ملف Excel هنا</div>
+        <div class="upload-text-sub">سيتم قراءة "سجل المركبات" و "قائمة الطلبات" تلقائيًا</div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" />
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <div id="mainContent" style="display:none;">
+
+        <!-- التابز الرئيسية -->
+        <div class="main-tabs">
+            <button class="main-tab active" data-maintab="overview" onclick="switchMainTab('overview')">📊 النظرة العامة</button>
+            <button class="main-tab" data-maintab="vehicles" onclick="switchMainTab('vehicles')">🚛 المركبات</button>
+            <button class="main-tab" data-maintab="orders" onclick="switchMainTab('orders')">📋 الطلبات</button>
+            <button class="main-tab" data-maintab="receivables" onclick="switchMainTab('receivables')">💰 الذمم المدينة</button>
+            <button class="main-tab" data-maintab="partners" onclick="switchMainTab('partners')">💼 توزيع الأرباح</button>
+        </div>
+
+        <!-- ============ تاب: النظرة العامة ============ -->
+        <div class="main-tab-content active" id="content-overview">
+
+            <!-- المساعد الذكي -->
+            <div class="section">
+                <div class="ai-assistant">
+                    <div class="ai-header">
+                        <div class="ai-avatar">
+                            <span>✨</span>
+                        </div>
+                        <div class="ai-title-block">
+                            <div class="ai-title">المساعد الذكي</div>
+                            <div class="ai-subtitle">اسألني أي شيء عن بياناتك بلغتك الطبيعية</div>
+                        </div>
+                    </div>
+
+                    <div class="ai-suggestions" id="aiSuggestions">
+                        <button class="ai-suggestion" onclick="askAI('كم سيارة لدي؟')">🚛 كم سيارة لدي؟</button>
+                        <button class="ai-suggestion" onclick="askAI('أعلى 5 عملاء عليهم متبقي')">💰 أعلى 5 متأخرين</button>
+                        <button class="ai-suggestion" onclick="askAI('كم رصيد مؤيد؟')">👤 رصيد مؤيد</button>
+                        <button class="ai-suggestion" onclick="askAI('كم يستحق هشام؟')">👤 ما يستحقه هشام</button>
+                        <button class="ai-suggestion" onclick="askAI('سيارات بدون جوال')">📞 بدون جوال</button>
+                        <button class="ai-suggestion" onclick="askAI('رخص ستنتهي خلال شهر')">⏰ رخص قريبة</button>
+                        <button class="ai-suggestion" onclick="askAI('إجمالي أرباح السنوية')">📅 أرباح السنوية</button>
+                        <button class="ai-suggestion" onclick="askAI('نسبة التحصيل')">📊 نسبة التحصيل</button>
+                        <button class="ai-suggestion" onclick="askAI('أكثر الماركات')">🏷️ الماركات</button>
+                        <button class="ai-suggestion" onclick="askAI('سيارات بلا طلبات')">📋 بلا طلبات</button>
+                    </div>
+
+                    <div class="ai-input-row">
+                        <input type="text" class="ai-input" id="aiInput" placeholder="مثال: كم رصيد مؤيد؟ • سيارات المالك ثرور • رخصة أ ص ع 5028"
+                               onkeypress="if(event.key==='Enter') askAI()">
+                        <button class="ai-send-btn" onclick="askAI()">
+                            <span>اسأل</span>
+                            <span>✨</span>
+                        </button>
+                    </div>
+
+                    <div class="ai-response" id="aiResponse"></div>
+                </div>
+            </div>
+
+            <!-- التنبيهات -->
+            <div class="section">
+                <div class="alerts-row" id="alertsRow"></div>
+            </div>
+
+            <!-- KPIs مالية -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-title-bar"></div>
+                        المؤشرات المالية
+                    </div>
+                    <div class="section-subtitle">ملخص المبالغ من سجل المركبات</div>
+                </div>
+                <div class="kpi-grid kpi-grid-6" id="financialKPIs"></div>
+            </div>
+
+            <!-- KPIs تشغيلية -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-title-bar" style="background: var(--grad-amber);"></div>
+                        المؤشرات التشغيلية
+                    </div>
+                    <div class="section-subtitle">حالة الأسطول والوثائق</div>
+                </div>
+                <div class="kpi-grid" id="operationalKPIs"></div>
+            </div>
+
+            <!-- KPIs الطلبات -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-title-bar" style="background: var(--grad-purple);"></div>
+                        مؤشرات الطلبات
+                    </div>
+                    <div class="section-subtitle">تحليل الطلبات والربحية</div>
+                </div>
+                <div class="kpi-grid" id="ordersKPIs"></div>
+            </div>
+
+            <!-- KPIs جودة البيانات -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-title-bar" style="background: var(--grad-sapphire);"></div>
+                        جودة البيانات
+                    </div>
+                    <div class="section-subtitle">السجلات الناقصة التي تحتاج إكمال</div>
+                </div>
+                <div class="kpi-grid" id="qualityKPIs"></div>
+            </div>
+
+            <!-- الرسوم البيانية -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-title-bar" style="background: var(--grad-cyan);"></div>
+                        تحليلات بصرية
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <div>
+                                <div class="chart-title">جدولة انتهاء الرخص</div>
+                                <div class="chart-meta">عدد السيارات في كل شهر</div>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-wrapper">
+                            <canvas id="renewalsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <div>
+                                <div class="chart-title">حالة التحصيل</div>
+                                <div class="chart-meta">من إجمالي المستحقات</div>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-wrapper">
+                            <canvas id="collectionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-row-2">
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <div>
+                                <div class="chart-title">الإيرادات حسب نوع الطلب</div>
+                                <div class="chart-meta">مقارنة سنوية vs أخرى</div>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-wrapper small">
+                            <canvas id="orderTypeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <div>
+                                <div class="chart-title">توزيع الأسطول حسب الماركة</div>
+                                <div class="chart-meta">أعلى 8 ماركات</div>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-wrapper small">
+                            <canvas id="brandsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-row-2">
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <div>
+                                <div class="chart-title">المالكون (أعلى 10)</div>
+                                <div class="chart-meta">عدد السيارات لكل مالك</div>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-wrapper small">
+                            <canvas id="ownersChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <div>
+                                <div class="chart-title">التكلفة vs المربح</div>
+                                <div class="chart-meta">حسب نوع الطلب</div>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-wrapper small">
+                            <canvas id="costProfitChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ تاب: المركبات ============ -->
+        <div class="main-tab-content" id="content-vehicles">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-title-bar"></div>
+                        قاعدة بيانات المركبات
+                    </div>
+                    <div class="section-subtitle" id="vehiclesSubtitle">100 سيارة</div>
+                </div>
+
+                <div class="table-card">
+                    <div class="tabs-nav">
+                        <button class="tab-btn active" data-vtab="all" onclick="switchVTab('all')">📋 جميع السيارات <span class="count-badge" id="vcnt-all">0</span></button>
+                        <button class="tab-btn" data-vtab="dues" onclick="switchVTab('dues')">💰 عليهم متبقي <span class="count-badge" id="vcnt-dues">0</span></button>
+                        <button class="tab-btn" data-vtab="expired" onclick="switchVTab('expired')">❌ رخصة منتهية <span class="count-badge" id="vcnt-expired">0</span></button>
+                        <button class="tab-btn" data-vtab="soon" onclick="switchVTab('soon')">⏰ تنتهي قريبًا <span class="count-badge" id="vcnt-soon">0</span></button>
+                        <button class="tab-btn" data-vtab="cardExpired" onclick="switchVTab('cardExpired')">🪪 كرت منتهي <span class="count-badge" id="vcnt-cardExpired">0</span></button>
+                        <button class="tab-btn" data-vtab="annualExpired" onclick="switchVTab('annualExpired')">📅 سنوية منتهية <span class="count-badge" id="vcnt-annualExpired">0</span></button>
+                        <button class="tab-btn" data-vtab="incomplete" onclick="switchVTab('incomplete')">⚠️ بيانات ناقصة <span class="count-badge" id="vcnt-incomplete">0</span></button>
+                        <button class="tab-btn" data-vtab="inactive" onclick="switchVTab('inactive')">🛑 غير نشطة <span class="count-badge" id="vcnt-inactive">0</span></button>
+                    </div>
+
+                    <div class="summary-strip" id="vehiclesSummary"></div>
+
+                    <div class="table-controls">
+                        <input type="text" class="search-input" id="vehiclesSearch" placeholder="🔍 ابحث برقم اللوحة، الاسم، الماركة، المالك...">
+                        <button class="export-btn" onclick="exportVehicles()">📥 تصدير CSV</button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table" id="vehiclesTable"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ تاب: الطلبات ============ -->
+        <div class="main-tab-content" id="content-orders">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-title-bar" style="background: var(--grad-purple);"></div>
+                        قائمة الطلبات
+                    </div>
+                    <div class="section-subtitle" id="ordersSubtitle">165 طلب</div>
+                </div>
+
+                <div class="table-card">
+                    <div class="tabs-nav">
+                        <button class="tab-btn active" data-otab="all" onclick="switchOTab('all')">📋 جميع الطلبات <span class="count-badge" id="ocnt-all">0</span></button>
+                        <button class="tab-btn" data-otab="unpaid" onclick="switchOTab('unpaid')">⏳ غير مدفوعة <span class="count-badge" id="ocnt-unpaid">0</span></button>
+                        <button class="tab-btn" data-otab="partial" onclick="switchOTab('partial')">◐ جزئية <span class="count-badge" id="ocnt-partial">0</span></button>
+                        <button class="tab-btn" data-otab="paid" onclick="switchOTab('paid')">✓ مدفوعة <span class="count-badge" id="ocnt-paid">0</span></button>
+                        <button class="tab-btn" data-otab="annual" onclick="switchOTab('annual')">📅 سنوية <span class="count-badge" id="ocnt-annual">0</span></button>
+                        <button class="tab-btn" data-otab="other" onclick="switchOTab('other')">🔧 أخرى <span class="count-badge" id="ocnt-other">0</span></button>
+                    </div>
+
+                    <div class="summary-strip" id="ordersSummary"></div>
+
+                    <div class="table-controls">
+                        <input type="text" class="search-input" id="ordersSearch" placeholder="🔍 ابحث برقم الطلب، اللوحة، النوع...">
+                        <button class="export-btn" onclick="exportOrders()">📥 تصدير CSV</button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table" id="ordersTable"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ تاب: الذمم المدينة ============ -->
+        <div class="main-tab-content" id="content-receivables">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-title-bar" style="background: var(--grad-ruby);"></div>
+                        الذمم المدينة - قائمة المتأخرين
+                    </div>
+                    <div class="section-subtitle" id="receivablesSubtitle">العملاء الذين عليهم مبالغ</div>
+                </div>
+
+                <div class="table-card">
+                    <div class="summary-strip" id="receivablesSummary"></div>
+
+                    <div class="table-controls">
+                        <input type="text" class="search-input" id="receivablesSearch" placeholder="🔍 ابحث عن عميل...">
+                        <button class="export-btn" onclick="exportReceivables()">📥 تصدير قائمة المتأخرين</button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table" id="receivablesTable"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+        <!-- ============ تاب: توزيع الأرباح ============ -->
+        <div class="main-tab-content" id="content-partners">
+
+            <!-- النتيجة النهائية (Hero) -->
+            <div class="section">
+                <div class="settlement-hero" id="settlementHero"></div>
+            </div>
+
+            <!-- بطاقات الشركاء -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-title-bar" style="background: var(--grad-purple);"></div>
+                        ملف الشركاء
+                    </div>
+                    <div class="section-subtitle">حصة كل شريك من المربح والتكاليف</div>
+                </div>
+                <div class="partners-grid" id="partnersGrid"></div>
+            </div>
+
+            <!-- جدول المقاسمة التفصيلي -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-title-bar" style="background: var(--grad-gold);"></div>
+                        جدول المقاسمة التفصيلي
+                    </div>
+                    <div class="section-subtitle">كل البنود المالية بين الشريكين</div>
+                </div>
+                <div class="settlement-table-card" id="settlementTable"></div>
+            </div>
+
+            <!-- الرسوم -->
+            <div class="section">
+                <div class="charts-row-2">
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <div>
+                                <div class="chart-title">حصة كل شريك من المربح</div>
+                                <div class="chart-meta">إجمالي الأرباح القابلة للتقسيم</div>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-wrapper">
+                            <canvas id="profitSplitChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <div>
+                                <div class="chart-title">تدفق التسوية</div>
+                                <div class="chart-meta">المستحق vs المُحوَّل</div>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-wrapper">
+                            <canvas id="settlementFlowChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- سجل التحويلات -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <div class="section-title-bar" style="background: var(--grad-emerald);"></div>
+                        سجل التحويلات من م إلى هـ
+                    </div>
+                    <div class="section-subtitle">جميع التسويات بين الشريكين</div>
+                </div>
+                <div class="table-card">
+                    <div class="summary-strip" id="transfersSummary"></div>
+                    <div class="table-wrapper">
+                        <table class="data-table" id="transfersTable"></table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    <!-- Modal تفاصيل السيارة -->
+    <div class="modal-overlay" id="vehicleModal" onclick="if(event.target===this) closeModal()">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <!-- الحالة الفارغة -->
+    <div id="emptyState" class="empty-state">
+        <div class="empty-state-icon">📂</div>
+        <div class="empty-state-text">ابدأ برفع ملف Excel</div>
+        <div class="empty-state-hint">يجب أن يحتوي الملف على ورقتين: "سجل المركبات" و "قائمة الطلبات"</div>
+    </div>
+
+</div>
+
+<script>
+// =================== المتغيرات العامة ===================
+let allVehicles = [];
+let allOrders = [];
+let settlementData = null;  // بيانات ورقة المحاصلة
+let currentVTab = 'all';
+let currentOTab = 'all';
+let currentMainTab = 'overview';
+let charts = {};
+let sortConfig = { vehicles: { col: null, dir: 'asc' }, orders: { col: null, dir: 'asc' } };
+const CURRENCY = 'ر.س';
+const PARTNER_M = 'مؤيد';
+const PARTNER_H = 'هشام';
+
+// =================== مساعدات ===================
+function safeNum(v) {
+    if (v === null || v === undefined || v === '') return 0;
+    if (typeof v === 'number') return isFinite(v) ? v : 0;
+    let s = String(v).trim();
+    const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+    s = s.replace(/[٠-٩]/g, d => String(arabicDigits.indexOf(d)));
+    s = s.replace(/[,،\s]/g, '');
+    const n = parseFloat(s);
+    return isFinite(n) ? n : 0;
+}
+
+function parseDate(value) {
+    if (value === null || value === undefined || value === '' || value === '-') return null;
+    if (value instanceof Date) return value;
+    if (typeof value === 'number') {
+        const utc_days = Math.floor(value - 25569);
+        return new Date(utc_days * 86400 * 1000);
+    }
+    if (typeof value === 'string') {
+        const s = value.trim();
+        const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (m) {
+            const y = parseInt(m[1]), mo = parseInt(m[2]), d = parseInt(m[3]);
+            if (y >= 1990 && y <= 2100) {
+                try { return new Date(y, mo - 1, d); } catch (e) { return null; }
+            }
+        }
+        try {
+            const d = new Date(s);
+            if (!isNaN(d)) return d;
+        } catch (e) {}
+    }
+    return null;
+}
+
+function fmt(n, dec = 0) {
+    if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
+    return new Intl.NumberFormat('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(Number(n));
+}
+
+function fmtCurrency(n) {
+    if (n === null || n === undefined || n === '' || isNaN(n)) return '-';
+    return fmt(n) + ' ' + CURRENCY;
+}
+
+function fmtDate(d) {
+    if (!d) return '-';
+    if (!(d instanceof Date) || isNaN(d)) return '-';
+    return d.toISOString().split('T')[0];
+}
+
+function daysBetween(d1, d2) {
+    return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+}
+
+function fmtPhone(p) {
+    if (!p) return null;
+    let s = String(p).replace(/[\s\-\(\)\+]/g, '');
+    if (s.startsWith('966')) s = s.substring(3);
+    if (s.startsWith('00966')) s = s.substring(5);
+    if (s.length === 9 && s.startsWith('5')) return '0' + s;
+    if (s.length === 10 && s.startsWith('05')) return s;
+    if (s === '0' || s === '') return null;
+    return p;
+}
+
+function cleanStr(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).trim();
+}
+
+// =================== الثيم ===================
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    document.getElementById('themeIcon').textContent = next === 'light' ? '🌙' : '☀️';
+    localStorage.setItem('theme', next);
+    if (allVehicles.length) renderAll();
+}
+
+(function() {
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        document.addEventListener('DOMContentLoaded', () => {
+            const el = document.getElementById('themeIcon');
+            if (el) el.textContent = saved === 'light' ? '🌙' : '☀️';
+        });
+    } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+})();
+
+// =================== الرفع ===================
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+
+['dragenter', 'dragover'].forEach(evt => {
+    uploadZone.addEventListener(evt, e => {
+        e.preventDefault(); e.stopPropagation();
+        uploadZone.classList.add('dragging');
+    });
+});
+
+['dragleave', 'drop'].forEach(evt => {
+    uploadZone.addEventListener(evt, e => {
+        e.preventDefault(); e.stopPropagation();
+        uploadZone.classList.remove('dragging');
+    });
+});
+
+uploadZone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+});
+
+fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) handleFile(file);
+});
+
+function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+            parseWorkbook(workbook);
+
+            uploadZone.classList.add('has-file');
+            uploadZone.querySelector('.upload-text-main').textContent = '✓ تم رفع الملف';
+            uploadZone.querySelector('.upload-text-sub').textContent =
+                `${file.name} • ${allVehicles.length} سيارة • ${allOrders.length} طلب`;
+
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+
+            const now = new Date();
+            document.getElementById('statusPill').innerHTML =
+                `<span class="dot"></span> آخر تحديث: ${now.toLocaleString('ar-SA', { dateStyle: 'short', timeStyle: 'short' })}`;
+
+            renderAll();
+        } catch (err) {
+            alert('خطأ في قراءة الملف: ' + err.message);
+            console.error(err);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// =================== تحليل الملف ===================
+function parseWorkbook(workbook) {
+    allVehicles = [];
+    allOrders = [];
+    settlementData = null;
+
+    // ابحث عن ورقة سجل المركبات
+    let vehicleSheetName = null;
+    for (const name of workbook.SheetNames) {
+        if (name.includes('المركبات') || name.includes('سجل') || name === workbook.SheetNames[0]) {
+            vehicleSheetName = name;
+            break;
+        }
+    }
+
+    if (vehicleSheetName) {
+        const ws = workbook.Sheets[vehicleSheetName];
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true, cellDates: true });
+        parseVehicles(data);
+    }
+
+    // ابحث عن ورقة الطلبات
+    let ordersSheetName = null;
+    for (const name of workbook.SheetNames) {
+        if (name.includes('الطلبات') || name.includes('طلبات')) {
+            ordersSheetName = name;
+            break;
+        }
+    }
+
+    if (ordersSheetName) {
+        const ws = workbook.Sheets[ordersSheetName];
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true, cellDates: true });
+        parseOrders(data);
+    }
+
+    // ابحث عن ورقة المحاصلة (توزيع الأرباح)
+    let settlementSheetName = null;
+    for (const name of workbook.SheetNames) {
+        if (name.includes('محاصلة') || name.includes('توزيع') || name.includes('أرباح') || name.includes('شركاء')) {
+            settlementSheetName = name;
+            break;
+        }
+    }
+
+    if (settlementSheetName) {
+        const ws = workbook.Sheets[settlementSheetName];
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true, cellDates: true });
+        parseSettlement(data);
+    }
+
+    // ربط الطلبات بالسيارات
+    linkOrdersToVehicles();
+}
+
+function parseSettlement(data) {
+    // قراءة ورقة المحاصلة - نبحث عن الصفوف بأسمائها
+    const result = {
+        totalProfit: { m: 0, h: 0, total: 0 },
+        totalCosts: { m: 0, h: 0, total: 0 },
+        totalSum: { m: 0, h: 0, total: 0 },
+        totalPaid: { m: 0, h: 0, total: 0 },
+        totalRemaining: { m: 0, h: 0, total: 0 },
+        shareProfit: { m: 0, h: 0 },
+        shareCosts: { m: 0, h: 0 },
+        totalDue: { m: 0, h: 0 },
+        actuallyReceived: { m: 0, h: 0 },
+        mNet: 0,
+        hDueFromM: 0,
+        transfers: [],
+        totalTransferred: 0,
+        hDueBeforeTransfers: 0,
+        actuallyTransferred: 0,
+        hRemainingAtM: 0
+    };
+
+    // مساعد لقراءة الأرقام
+    const num = (v) => {
+        if (v === null || v === undefined || v === '' || v === '-') return 0;
+        if (typeof v === 'number') return v;
+        const n = parseFloat(String(v).replace(/[,،\s]/g, ''));
+        return isFinite(n) ? n : 0;
+    };
+
+    let inTransfersSection = false;
+
+    for (const row of data) {
+        if (!row || !row[0]) {
+            // إذا في قسم التحويلات وصف فارغ، نوقف فقط لو وصلنا للإجماليات
+            continue;
+        }
+
+        const label = String(row[0]).trim();
+
+        // معالجة التواريخ في قسم التحويلات
+        if (inTransfersSection && row[0] instanceof Date) {
+            result.transfers.push({
+                date: row[0],
+                amount: num(row[1]),
+                notes: row[2] || ''
+            });
+            continue;
+        }
+
+        if (label === 'سجل التحويلات من م إلى هـ') {
+            inTransfersSection = true;
+            continue;
+        }
+
+        if (label === 'التاريخ') continue;  // ترويسة جدول التحويلات
+
+        if (label.includes('إجمالي ما حوّله')) {
+            inTransfersSection = false;
+            result.totalTransferred = num(row[1]);
+            continue;
+        }
+
+        if (label.includes('النتيجة النهائية') || label.includes('صافي المقاسمة') ||
+            label.includes('سجل التحويلات') || label.includes('المقاسمة') ||
+            label === 'البند' || label.includes('مقاسمة')) {
+            continue;
+        }
+
+        // البنود الرئيسية
+        if (label.includes('إجمالي المربح')) {
+            result.totalProfit = { m: num(row[1]), h: num(row[2]), total: num(row[3]) };
+        } else if (label.includes('إجمالي التكاليف')) {
+            result.totalCosts = { m: num(row[1]), h: num(row[2]), total: num(row[3]) };
+        } else if (label.includes('إجمالي المجموع')) {
+            result.totalSum = { m: num(row[1]), h: num(row[2]), total: num(row[3]) };
+        } else if (label.includes('إجمالي المدفوعات')) {
+            result.totalPaid = { m: num(row[1]), h: num(row[2]), total: num(row[3]) };
+        } else if (label.includes('إجمالي المتبقي') && label.includes('لم يُحصّل')) {
+            result.totalRemaining = { m: num(row[1]), h: num(row[2]), total: num(row[3]) };
+        } else if (label.includes('حصته من المربح')) {
+            result.shareProfit = { m: num(row[1]), h: num(row[2]) };
+        } else if (label.includes('حصته من التكاليف')) {
+            result.shareCosts = { m: num(row[1]), h: num(row[2]) };
+        } else if (label.includes('إجمالي ما يستحقه')) {
+            result.totalDue = { m: num(row[1]), h: num(row[2]) };
+        } else if (label.includes('ما استلمه م فعلياً')) {
+            result.actuallyReceived = { m: num(row[1]), h: num(row[2]) };
+        } else if (label.includes('م استلم أكثر')) {
+            result.mNet = num(row[1]);
+        } else if (label.includes('هـ يستحق')) {
+            result.hDueFromM = num(row[2]);
+        } else if (label.includes('المستحق لـ هـ')) {
+            result.hDueBeforeTransfers = num(row[1]);
+        } else if (label.includes('ما تم تحويله فعلياً')) {
+            result.actuallyTransferred = num(row[1]);
+        } else if (label.includes('المتبقي لـ هـ عند م')) {
+            result.hRemainingAtM = num(row[1]);
+        }
+    }
+
+    settlementData = result;
+    console.log('Settlement data:', settlementData);
+}
+
+function parseVehicles(data) {
+    // العثور على صف الترويسة
+    let headerRow = 0;
+    for (let i = 0; i < Math.min(5, data.length); i++) {
+        const row = data[i];
+        if (row.some(c => String(c).includes('رقم اللوحة') || String(c).includes('اللوحة'))) {
+            headerRow = i;
+            break;
+        }
+    }
+
+    const today = new Date();
+
+    for (let i = headerRow + 1; i < data.length; i++) {
+        const row = data[i];
+        if (!row[1]) continue;
+
+        const annualTotal = safeNum(row[16]);  // مجموع قيمة الطلبات
+        const paid = safeNum(row[17]);          // مجموع المدفوعات
+        const discount = safeNum(row[18]);      // مجموع الخصومات
+        const remaining = safeNum(row[19]);     // مجموع المتبقي
+
+        const phoneRaw = row[20];
+        const phone = (phoneRaw && phoneRaw !== 0 && phoneRaw !== '0') ? fmtPhone(phoneRaw) : null;
+
+        const sticker = row[21];
+        let stickerStatus = '';
+        if (sticker === true || sticker === 'TRUE' || String(sticker).toLowerCase() === 'true') stickerStatus = 'موجود';
+        else if (sticker === false || sticker === 'FALSE' || String(sticker).toLowerCase() === 'false') stickerStatus = 'غير موجود';
+        else stickerStatus = cleanStr(sticker);
+
+        const v = {
+            idx: row[0],
+            plate: cleanStr(row[1]),
+            status: cleanStr(row[2]),
+            regType: cleanStr(row[3]),
+            brand: cleanStr(row[4]),
+            model: cleanStr(row[5]),
+            year: row[6],
+            serial: row[7],
+            color: cleanStr(row[8]),
+            ownershipDate: parseDate(row[9]),
+            licenseExpiry: parseDate(row[10]),
+            cardExpiry: parseDate(row[11]),
+            userId: row[12],
+            userName: cleanStr(row[13]),
+            annualStart: parseDate(row[14]),
+            annualEnd: parseDate(row[15]),
+            totalAmount: annualTotal,
+            paid: paid,
+            discount: discount,
+            remaining: remaining,
+            phoneRaw: phoneRaw,
+            phone: phone,
+            sticker: stickerStatus,
+            owner: cleanStr(row[22]),
+            notes: cleanStr(row[23]),
+            orders: []  // ستُملأ لاحقًا
+        };
+
+        // تطبيع الحالة
+        if (v.status === 'تعمل') v.statusNormalized = 'active';
+        else if (v.status === 'لا تعمل') v.statusNormalized = 'inactive';
+        else v.statusNormalized = 'unknown';
+
+        // تصنيف المخاطر
+        v.licenseDays = v.licenseExpiry ? daysBetween(today, v.licenseExpiry) : null;
+        v.cardDays = v.cardExpiry ? daysBetween(today, v.cardExpiry) : null;
+        v.annualDays = v.annualEnd ? daysBetween(today, v.annualEnd) : null;
+
+        v.hasDues = v.remaining > 0;
+        v.licenseExpired = v.licenseDays !== null && v.licenseDays < 0;
+        v.licenseSoon = v.licenseDays !== null && v.licenseDays >= 0 && v.licenseDays <= 30;
+        v.cardExpired = v.cardDays !== null && v.cardDays < 0;
+        v.cardSoon = v.cardDays !== null && v.cardDays >= 0 && v.cardDays <= 30;
+        v.annualExpired = v.annualDays !== null && v.annualDays < 0;
+        v.annualSoon = v.annualDays !== null && v.annualDays >= 0 && v.annualDays <= 30;
+        v.incomplete = !v.userName || !v.phone || !v.owner;
+
+        allVehicles.push(v);
+    }
+}
+
+function parseOrders(data) {
+    let headerRow = 0;
+    for (let i = 0; i < Math.min(5, data.length); i++) {
+        const row = data[i];
+        if (row.some(c => String(c).includes('رقم الطلب') || String(c).includes('الطلب'))) {
+            headerRow = i;
+            break;
+        }
+    }
+
+    for (let i = headerRow + 1; i < data.length; i++) {
+        const row = data[i];
+        if (!row[0]) continue;
+
+        const cost = safeNum(row[4]);
+        const profit = safeNum(row[5]);
+        const discount = safeNum(row[6]);
+        let total = safeNum(row[7]);
+        const paid = safeNum(row[8]);
+        let remaining = safeNum(row[9]);
+
+        if (total === 0 && (cost > 0 || profit > 0)) total = cost + profit - discount;
+        if (remaining === 0 && total > 0) {
+            const calc = total - paid;
+            if (calc > 0) remaining = calc;
+        }
+
+        const o = {
+            id: row[0],
+            plate: cleanStr(row[1]),
+            type: cleanStr(row[2]),
+            serviceNotes: cleanStr(row[3]),
+            cost: cost,
+            profit: profit,
+            discount: discount,
+            total: total,
+            paid: paid,
+            remaining: remaining,
+            financialNotes: cleanStr(row[10]),
+            partnerRate: row[11],
+            shareM: safeNum(row[12]),
+            shareH: safeNum(row[13])
+        };
+
+        // حالة الطلب
+        if (o.remaining === 0 && o.paid > 0) o.payStatus = 'paid';
+        else if (o.paid > 0 && o.remaining > 0) o.payStatus = 'partial';
+        else o.payStatus = 'unpaid';
+
+        // هامش الربح
+        o.margin = o.total > 0 ? o.profit / o.total : 0;
+
+        allOrders.push(o);
+    }
+}
+
+function linkOrdersToVehicles() {
+    const vehicleMap = {};
+    allVehicles.forEach(v => vehicleMap[v.plate] = v);
+
+    allOrders.forEach(o => {
+        if (vehicleMap[o.plate]) {
+            vehicleMap[o.plate].orders.push(o);
+            o.vehicleData = vehicleMap[o.plate];
+        }
+    });
+}
+
+// =================== الحسابات ===================
+function computeStats() {
+    const today = new Date();
+
+    // المركبات
+    const totalCars = allVehicles.length;
+    const activeCars = allVehicles.filter(v => v.statusNormalized === 'active').length;
+    const inactiveCars = allVehicles.filter(v => v.statusNormalized === 'inactive').length;
+
+    // المالية من سجل المركبات
+    const totalAmount = allVehicles.reduce((a, v) => a + v.totalAmount, 0);
+    const totalPaid = allVehicles.reduce((a, v) => a + v.paid, 0);
+    const totalDiscount = allVehicles.reduce((a, v) => a + v.discount, 0);
+    const totalRemaining = allVehicles.reduce((a, v) => a + v.remaining, 0);
+    const collectionRate = totalAmount > 0 ? totalPaid / totalAmount : 0;
+
+    // الطلبات (تفصيل أكثر)
+    const totalOrders = allOrders.length;
+    const annualOrders = allOrders.filter(o => o.type === 'سنوية').length;
+    const otherOrders = allOrders.filter(o => o.type === 'أخرى').length;
+    const paidOrders = allOrders.filter(o => o.payStatus === 'paid').length;
+    const partialOrders = allOrders.filter(o => o.payStatus === 'partial').length;
+    const unpaidOrders = allOrders.filter(o => o.payStatus === 'unpaid').length;
+
+    const ordersTotalCost = allOrders.reduce((a, o) => a + o.cost, 0);
+    const ordersTotalProfit = allOrders.reduce((a, o) => a + o.profit, 0);
+    const ordersTotalSum = allOrders.reduce((a, o) => a + o.total, 0);
+    const ordersTotalPaid = allOrders.reduce((a, o) => a + o.paid, 0);
+    const ordersTotalRemaining = allOrders.reduce((a, o) => a + o.remaining, 0);
+    const overallMargin = ordersTotalSum > 0 ? ordersTotalProfit / ordersTotalSum : 0;
+
+    // إيرادات حسب النوع
+    const annualRevenue = allOrders.filter(o => o.type === 'سنوية').reduce((a, o) => a + o.profit, 0);
+    const otherRevenue = allOrders.filter(o => o.type === 'أخرى').reduce((a, o) => a + o.profit, 0);
+
+    // التشغيلية
+    const carsWithDues = allVehicles.filter(v => v.hasDues).length;
+    const carsWithDiscount = allVehicles.filter(v => v.discount > 0).length;
+    const carsExpired = allVehicles.filter(v => v.licenseExpired).length;
+    const carsSoon = allVehicles.filter(v => v.licenseSoon).length;
+    const cardExpired = allVehicles.filter(v => v.cardExpired).length;
+    const cardSoon = allVehicles.filter(v => v.cardSoon).length;
+    const annualExpired = allVehicles.filter(v => v.annualExpired).length;
+    const annualSoon = allVehicles.filter(v => v.annualSoon).length;
+
+    // جودة البيانات
+    const noPhone = allVehicles.filter(v => !v.phone).length;
+    const noName = allVehicles.filter(v => !v.userName).length;
+    const noOwner = allVehicles.filter(v => !v.owner).length;
+    const incomplete = allVehicles.filter(v => v.incomplete).length;
+
+    // سيارات بلا طلبات
+    const carsWithoutOrders = allVehicles.filter(v => v.orders.length === 0).length;
+
+    return {
+        totalCars, activeCars, inactiveCars,
+        totalAmount, totalPaid, totalDiscount, totalRemaining, collectionRate,
+        totalOrders, annualOrders, otherOrders, paidOrders, partialOrders, unpaidOrders,
+        ordersTotalCost, ordersTotalProfit, ordersTotalSum, ordersTotalPaid, ordersTotalRemaining, overallMargin,
+        annualRevenue, otherRevenue,
+        carsWithDues, carsWithDiscount, carsExpired, carsSoon,
+        cardExpired, cardSoon, annualExpired, annualSoon,
+        noPhone, noName, noOwner, incomplete, carsWithoutOrders
+    };
+}
+
+// =================== الرسم العام ===================
+function renderAll() {
+    const stats = computeStats();
+    renderAlerts(stats);
+    renderFinancialKPIs(stats);
+    renderOperationalKPIs(stats);
+    renderOrdersKPIs(stats);
+    renderQualityKPIs(stats);
+    renderCharts(stats);
+
+    renderVehicleTabCounts(stats);
+    renderVehiclesTable();
+
+    renderOrderTabCounts(stats);
+    renderOrdersTable();
+
+    renderReceivablesTable();
+
+    renderPartnersTab();
+}
+
+// =================== التنبيهات ===================
+function renderAlerts(stats) {
+    const alerts = [];
+
+    if (stats.totalRemaining > 0) {
+        alerts.push({
+            type: 'danger',
+            icon: '💰',
+            title: `${fmtCurrency(stats.totalRemaining)} ذمم مدينة`,
+            message: `${stats.carsWithDues} عميل لم يسدد كامل المستحقات`
+        });
+    } else {
+        alerts.push({
+            type: 'success',
+            icon: '✓',
+            title: 'لا توجد ذمم مدينة',
+            message: 'كل العملاء سددوا مستحقاتهم'
+        });
+    }
+
+    if (stats.carsExpired > 0) {
+        alerts.push({
+            type: 'danger',
+            icon: '❌',
+            title: `${stats.carsExpired} رخصة منتهية`,
+            message: 'تواصل مع أصحابها للتجديد فورًا'
+        });
+    } else if (stats.carsSoon > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: '⏰',
+            title: `${stats.carsSoon} رخصة ستنتهي خلال 30 يومًا`,
+            message: 'الوقت مناسب للتواصل الاستباقي'
+        });
+    } else {
+        alerts.push({
+            type: 'success',
+            icon: '✓',
+            title: 'جميع الرخص سارية',
+            message: 'لا توجد رخص قريبة الانتهاء'
+        });
+    }
+
+    if (stats.annualExpired > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: '📅',
+            title: `${stats.annualExpired} سنوية منتهية`,
+            message: 'تحتاج تجديد الاشتراك السنوي'
+        });
+    }
+
+    if (stats.unpaidOrders > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: '⏳',
+            title: `${stats.unpaidOrders} طلب غير مدفوع`,
+            message: `بقيمة ${fmtCurrency(stats.ordersTotalRemaining)}`
+        });
+    }
+
+    if (stats.incomplete > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: '⚠️',
+            title: `${stats.incomplete} سجل ناقص البيانات`,
+            message: `${stats.noPhone} بدون جوال • ${stats.noName} بدون اسم • ${stats.noOwner} بدون مالك`
+        });
+    }
+
+    document.getElementById('alertsRow').innerHTML = alerts.map(a => `
+        <div class="alert-card alert-${a.type}">
+            <div class="alert-icon">${a.icon}</div>
+            <div>
+                <div class="alert-title">${a.title}</div>
+                <div class="alert-message">${a.message}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// =================== KPIs المالية ===================
+function renderFinancialKPIs(stats) {
+    const kpis = [
+        {
+            icon: '💎', label: 'إجمالي المبالغ', value: fmtCurrency(stats.totalAmount),
+            sub: `${stats.totalCars} سيارة في السجل`,
+            color: 'gold', iconBg: 'rgba(212, 175, 55, 0.12)', iconFg: 'var(--gold)',
+            accent: 'var(--grad-gold)', highlight: true
+        },
+        {
+            icon: '📅', label: 'إيرادات السنوية', value: fmtCurrency(stats.annualRevenue),
+            sub: `${stats.annualOrders} طلب سنوية`,
+            color: 'sapphire', iconBg: 'rgba(59, 130, 246, 0.12)', iconFg: 'var(--sapphire-glow)',
+            accent: 'var(--grad-sapphire)'
+        },
+        {
+            icon: '🔧', label: 'إيرادات الخدمات الأخرى', value: fmtCurrency(stats.otherRevenue),
+            sub: `${stats.otherOrders} طلب خدمات أخرى`,
+            color: 'cyan', iconBg: 'rgba(6, 182, 212, 0.12)', iconFg: 'var(--cyan-glow)',
+            accent: 'var(--grad-cyan)'
+        },
+        {
+            icon: '✅', label: 'إجمالي المدفوع', value: fmtCurrency(stats.totalPaid),
+            sub: `نسبة التحصيل ${(stats.collectionRate * 100).toFixed(1)}%`,
+            progress: stats.collectionRate * 100,
+            color: 'emerald', iconBg: 'rgba(16, 185, 129, 0.12)', iconFg: 'var(--emerald-glow)',
+            accent: 'var(--grad-emerald)'
+        },
+        {
+            icon: '🏷️', label: 'إجمالي الخصم', value: fmtCurrency(stats.totalDiscount),
+            sub: `${stats.carsWithDiscount} سيارة بخصم`,
+            color: 'purple', iconBg: 'rgba(139, 92, 246, 0.12)', iconFg: 'var(--purple-glow)',
+            accent: 'var(--grad-purple)'
+        },
+        {
+            icon: '⚠️', label: 'إجمالي المتبقي', value: fmtCurrency(stats.totalRemaining),
+            sub: `${stats.carsWithDues} عميل عليه متبقي`,
+            color: 'ruby', iconBg: 'rgba(239, 68, 68, 0.12)', iconFg: 'var(--ruby-glow)',
+            accent: 'var(--grad-ruby)'
+        }
+    ];
+
+    document.getElementById('financialKPIs').innerHTML = kpis.map(k => `
+        <div class="kpi-card ${k.highlight ? 'kpi-highlight' : ''}" style="--kpi-accent: ${k.accent}; --kpi-icon-bg: ${k.iconBg}; --kpi-icon-fg: ${k.iconFg};">
+            <div class="kpi-icon-wrap">${k.icon}</div>
+            <div class="kpi-label">${k.label}</div>
+            <div class="kpi-value val-${k.color}">${k.value}</div>
+            <div class="kpi-sub"><span>${k.sub}</span></div>
+            ${k.progress !== undefined ? `<div class="kpi-progress"><div class="kpi-progress-bar" style="width: ${k.progress}%;"></div></div>` : ''}
+        </div>
+    `).join('');
+}
+
+// =================== KPIs التشغيلية ===================
+function renderOperationalKPIs(stats) {
+    const kpis = [
+        {
+            icon: '🚛', label: 'إجمالي السيارات', value: fmt(stats.totalCars),
+            sub: `<span class="kpi-badge good">✓ ${stats.activeCars} نشطة</span> ${stats.inactiveCars > 0 ? `<span class="kpi-badge bad">${stats.inactiveCars} متوقفة</span>` : ''}`,
+            color: 'gold', iconBg: 'rgba(212, 175, 55, 0.12)', iconFg: 'var(--gold)', accent: 'var(--grad-gold)'
+        },
+        {
+            icon: '❌', label: 'رخص منتهية', value: fmt(stats.carsExpired),
+            sub: stats.carsExpired > 0 ? 'تحتاج تجديدًا فوريًا' : 'كل الرخص سارية',
+            color: stats.carsExpired > 0 ? 'ruby' : 'emerald',
+            iconBg: stats.carsExpired > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+            iconFg: stats.carsExpired > 0 ? 'var(--ruby-glow)' : 'var(--emerald-glow)',
+            accent: stats.carsExpired > 0 ? 'var(--grad-ruby)' : 'var(--grad-emerald)'
+        },
+        {
+            icon: '⏰', label: 'رخص تنتهي خلال 30 يوم', value: fmt(stats.carsSoon),
+            sub: stats.carsSoon > 0 ? 'تواصل استباقي' : 'لا يوجد قريب',
+            color: stats.carsSoon > 0 ? 'amber' : 'emerald',
+            iconBg: stats.carsSoon > 0 ? 'rgba(245, 158, 11, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+            iconFg: stats.carsSoon > 0 ? 'var(--amber-glow)' : 'var(--emerald-glow)',
+            accent: stats.carsSoon > 0 ? 'var(--grad-amber)' : 'var(--grad-emerald)'
+        },
+        {
+            icon: '🪪', label: 'كروت تشغيل (منتهية/قريبة)', value: fmt(stats.cardExpired + stats.cardSoon),
+            sub: `${stats.cardExpired} منتهي • ${stats.cardSoon} قريب`,
+            color: (stats.cardExpired + stats.cardSoon) > 0 ? 'amber' : 'emerald',
+            iconBg: 'rgba(245, 158, 11, 0.12)', iconFg: 'var(--amber-glow)', accent: 'var(--grad-amber)'
+        }
+    ];
+
+    document.getElementById('operationalKPIs').innerHTML = kpis.map(k => `
+        <div class="kpi-card" style="--kpi-accent: ${k.accent}; --kpi-icon-bg: ${k.iconBg}; --kpi-icon-fg: ${k.iconFg};">
+            <div class="kpi-icon-wrap">${k.icon}</div>
+            <div class="kpi-label">${k.label}</div>
+            <div class="kpi-value val-${k.color}">${k.value}</div>
+            <div class="kpi-sub"><span>${k.sub}</span></div>
+        </div>
+    `).join('');
+}
+
+// =================== KPIs الطلبات ===================
+function renderOrdersKPIs(stats) {
+    const kpis = [
+        {
+            icon: '📋', label: 'إجمالي الطلبات', value: fmt(stats.totalOrders),
+            sub: `<span class="kpi-badge good">${stats.paidOrders} مدفوع</span> <span class="kpi-badge warn">${stats.partialOrders} جزئي</span> <span class="kpi-badge bad">${stats.unpaidOrders} لم يدفع</span>`,
+            color: 'purple', iconBg: 'rgba(139, 92, 246, 0.12)', iconFg: 'var(--purple-glow)', accent: 'var(--grad-purple)'
+        },
+        {
+            icon: '💰', label: 'مجموع قيم الطلبات', value: fmtCurrency(stats.ordersTotalSum),
+            sub: `تكلفة ${fmtCurrency(stats.ordersTotalCost)} + ربح ${fmtCurrency(stats.ordersTotalProfit)}`,
+            color: 'gold', iconBg: 'rgba(212, 175, 55, 0.12)', iconFg: 'var(--gold)', accent: 'var(--grad-gold)'
+        },
+        {
+            icon: '📈', label: 'إجمالي الأرباح', value: fmtCurrency(stats.ordersTotalProfit),
+            sub: `هامش الربح ${(stats.overallMargin * 100).toFixed(1)}%`,
+            progress: stats.overallMargin * 100,
+            color: 'emerald', iconBg: 'rgba(16, 185, 129, 0.12)', iconFg: 'var(--emerald-glow)', accent: 'var(--grad-emerald)'
+        },
+        {
+            icon: '⏳', label: 'متبقي على الطلبات', value: fmtCurrency(stats.ordersTotalRemaining),
+            sub: `${stats.unpaidOrders + stats.partialOrders} طلب يحتاج متابعة`,
+            color: 'ruby', iconBg: 'rgba(239, 68, 68, 0.12)', iconFg: 'var(--ruby-glow)', accent: 'var(--grad-ruby)'
+        }
+    ];
+
+    document.getElementById('ordersKPIs').innerHTML = kpis.map(k => `
+        <div class="kpi-card" style="--kpi-accent: ${k.accent}; --kpi-icon-bg: ${k.iconBg}; --kpi-icon-fg: ${k.iconFg};">
+            <div class="kpi-icon-wrap">${k.icon}</div>
+            <div class="kpi-label">${k.label}</div>
+            <div class="kpi-value val-${k.color}">${k.value}</div>
+            <div class="kpi-sub"><span>${k.sub}</span></div>
+            ${k.progress !== undefined ? `<div class="kpi-progress"><div class="kpi-progress-bar" style="width: ${k.progress}%;"></div></div>` : ''}
+        </div>
+    `).join('');
+}
+
+// =================== KPIs جودة البيانات ===================
+function renderQualityKPIs(stats) {
+    const kpis = [
+        {
+            icon: '📞', label: 'سيارات بدون جوال', value: fmt(stats.noPhone),
+            sub: stats.noPhone > 0 ? `${((stats.noPhone / stats.totalCars) * 100).toFixed(0)}% من السجلات` : 'كاملة',
+            color: stats.noPhone > 0 ? 'amber' : 'emerald',
+            iconBg: 'rgba(245, 158, 11, 0.12)', iconFg: 'var(--amber-glow)', accent: 'var(--grad-amber)'
+        },
+        {
+            icon: '👤', label: 'سيارات بدون اسم', value: fmt(stats.noName),
+            sub: stats.noName > 0 ? 'تحتاج إكمال' : 'كل الأسماء موجودة',
+            color: stats.noName > 0 ? 'amber' : 'emerald',
+            iconBg: 'rgba(245, 158, 11, 0.12)', iconFg: 'var(--amber-glow)', accent: 'var(--grad-amber)'
+        },
+        {
+            icon: '🏢', label: 'سيارات بدون مالك', value: fmt(stats.noOwner),
+            sub: stats.noOwner > 0 ? 'تحتاج تحديد المالك' : 'كل المالكين محددون',
+            color: stats.noOwner > 0 ? 'amber' : 'emerald',
+            iconBg: 'rgba(245, 158, 11, 0.12)', iconFg: 'var(--amber-glow)', accent: 'var(--grad-amber)'
+        },
+        {
+            icon: '📊', label: 'سيارات بلا طلبات', value: fmt(stats.carsWithoutOrders),
+            sub: stats.carsWithoutOrders > 0 ? 'لم تُسجل لها طلبات بعد' : 'كل السيارات لها طلبات',
+            color: stats.carsWithoutOrders > 0 ? 'sapphire' : 'emerald',
+            iconBg: 'rgba(59, 130, 246, 0.12)', iconFg: 'var(--sapphire-glow)', accent: 'var(--grad-sapphire)'
+        }
+    ];
+
+    document.getElementById('qualityKPIs').innerHTML = kpis.map(k => `
+        <div class="kpi-card" style="--kpi-accent: ${k.accent}; --kpi-icon-bg: ${k.iconBg}; --kpi-icon-fg: ${k.iconFg};">
+            <div class="kpi-icon-wrap">${k.icon}</div>
+            <div class="kpi-label">${k.label}</div>
+            <div class="kpi-value val-${k.color}">${k.value}</div>
+            <div class="kpi-sub"><span>${k.sub}</span></div>
+        </div>
+    `).join('');
+}
+
+// =================== الرسوم البيانية ===================
+function getChartTextColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+}
+
+function getChartGridColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--border-subtle').trim();
+}
+
+function destroyCharts() {
+    Object.values(charts).forEach(c => c && c.destroy());
+    charts = {};
+}
+
+function renderCharts(stats) {
+    destroyCharts();
+    Chart.defaults.font.family = "'IBM Plex Sans Arabic', system-ui";
+    Chart.defaults.color = getChartTextColor();
+
+    // 1. جدولة الرخص
+    const today = new Date();
+    const monthBuckets = {};
+    const monthLabels = [];
+    for (let i = -3; i < 12; i++) {
+        const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        monthBuckets[key] = { renewals: 0, expired: 0 };
+        monthLabels.push({ key, label: d.toLocaleDateString('ar-SA', { month: 'short', year: '2-digit' }) });
+    }
+    allVehicles.forEach(v => {
+        if (!v.licenseExpiry) return;
+        const key = `${v.licenseExpiry.getFullYear()}-${String(v.licenseExpiry.getMonth() + 1).padStart(2, '0')}`;
+        if (monthBuckets[key]) {
+            if (v.licenseExpired) monthBuckets[key].expired++;
+            else monthBuckets[key].renewals++;
+        }
+    });
+
+    charts.renewals = new Chart(document.getElementById('renewalsChart'), {
+        type: 'bar',
+        data: {
+            labels: monthLabels.map(m => m.label),
+            datasets: [
+                { label: 'منتهية', data: monthLabels.map(m => monthBuckets[m.key].expired), backgroundColor: 'rgba(239, 68, 68, 0.75)', borderRadius: 6, stack: 'a' },
+                { label: 'قادمة', data: monthLabels.map(m => monthBuckets[m.key].renewals), backgroundColor: 'rgba(212, 175, 55, 0.75)', borderRadius: 6, stack: 'a' }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { boxWidth: 12, padding: 10, font: { size: 11 } } },
+                tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y} سيارة` } }
+            },
+            scales: {
+                x: { grid: { display: false }, stacked: true, ticks: { font: { size: 10 } } },
+                y: { grid: { color: getChartGridColor() }, stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+            }
+        }
+    });
+
+    // 2. حالة التحصيل
+    charts.collection = new Chart(document.getElementById('collectionChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['مُحصَّل', 'متبقي', 'مخصوم'],
+            datasets: [{
+                data: [stats.totalPaid, Math.max(0, stats.totalRemaining), stats.totalDiscount],
+                backgroundColor: ['#10b981', '#ef4444', '#3b82f6'],
+                borderWidth: 0, hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 12 } } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.label}: ${fmtCurrency(ctx.parsed)} (${((ctx.parsed / stats.totalAmount) * 100).toFixed(1)}%)`
+                    }
+                }
+            }
+        }
+    });
+
+    // 3. حسب نوع الطلب
+    charts.orderType = new Chart(document.getElementById('orderTypeChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['سنوية', 'أخرى'],
+            datasets: [{
+                data: [stats.annualRevenue, stats.otherRevenue],
+                backgroundColor: ['#3b82f6', '#06b6d4'],
+                borderWidth: 0, hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '60%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.label}: ${fmtCurrency(ctx.parsed)}`
+                    }
+                }
+            }
+        }
+    });
+
+    // 4. الماركات
+    const brandCounts = {};
+    allVehicles.forEach(v => {
+        if (!v.brand) return;
+        brandCounts[v.brand] = (brandCounts[v.brand] || 0) + 1;
+    });
+    const sortedBrands = Object.entries(brandCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    charts.brands = new Chart(document.getElementById('brandsChart'), {
+        type: 'bar',
+        data: {
+            labels: sortedBrands.map(b => b[0]),
+            datasets: [{
+                label: 'العدد',
+                data: sortedBrands.map(b => b[1]),
+                backgroundColor: ['#d4af37', '#3b82f6', '#10b981', '#f97316', '#8b5cf6', '#ef4444', '#06b6d4', '#f59e0b'],
+                borderRadius: 6, borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => `${ctx.parsed.x} سيارة` } }
+            },
+            scales: {
+                x: { grid: { color: getChartGridColor() }, beginAtZero: true, ticks: { precision: 0 } },
+                y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            }
+        }
+    });
+
+    // 5. المالكون (أعلى 10)
+    const ownerCounts = {};
+    allVehicles.forEach(v => {
+        if (!v.owner) return;
+        ownerCounts[v.owner] = (ownerCounts[v.owner] || 0) + 1;
+    });
+    const sortedOwners = Object.entries(ownerCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    charts.owners = new Chart(document.getElementById('ownersChart'), {
+        type: 'bar',
+        data: {
+            labels: sortedOwners.map(o => o[0]),
+            datasets: [{
+                label: 'العدد',
+                data: sortedOwners.map(o => o[1]),
+                backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                borderRadius: 6, borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => `${ctx.parsed.x} سيارة` } }
+            },
+            scales: {
+                x: { grid: { color: getChartGridColor() }, beginAtZero: true, ticks: { precision: 0 } },
+                y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+            }
+        }
+    });
+
+    // 6. التكلفة vs المربح
+    const annualCost = allOrders.filter(o => o.type === 'سنوية').reduce((a, o) => a + o.cost, 0);
+    const annualProfit = allOrders.filter(o => o.type === 'سنوية').reduce((a, o) => a + o.profit, 0);
+    const otherCost = allOrders.filter(o => o.type === 'أخرى').reduce((a, o) => a + o.cost, 0);
+    const otherProfit = allOrders.filter(o => o.type === 'أخرى').reduce((a, o) => a + o.profit, 0);
+
+    charts.costProfit = new Chart(document.getElementById('costProfitChart'), {
+        type: 'bar',
+        data: {
+            labels: ['سنوية', 'أخرى'],
+            datasets: [
+                { label: 'التكلفة', data: [annualCost, otherCost], backgroundColor: 'rgba(239, 68, 68, 0.75)', borderRadius: 6 },
+                { label: 'المربح', data: [annualProfit, otherProfit], backgroundColor: 'rgba(16, 185, 129, 0.75)', borderRadius: 6 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top', labels: { boxWidth: 12, padding: 10, font: { size: 11 } } },
+                tooltip: {
+                    callbacks: { label: ctx => `${ctx.dataset.label}: ${fmtCurrency(ctx.parsed.y)}` }
+                }
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { color: getChartGridColor() }, beginAtZero: true, ticks: { callback: v => fmt(v) } }
+            }
+        }
+    });
+}
+
+// =================== تابز رئيسية ===================
+function switchMainTab(tab) {
+    currentMainTab = tab;
+    document.querySelectorAll('.main-tab').forEach(b => {
+        b.classList.toggle('active', b.dataset.maintab === tab);
+    });
+    document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('content-' + tab).classList.add('active');
+}
+
+// =================== جدول المركبات ===================
+function renderVehicleTabCounts(stats) {
+    document.getElementById('vcnt-all').textContent = stats.totalCars;
+    document.getElementById('vcnt-dues').textContent = stats.carsWithDues;
+    document.getElementById('vcnt-expired').textContent = stats.carsExpired;
+    document.getElementById('vcnt-soon').textContent = stats.carsSoon;
+    document.getElementById('vcnt-cardExpired').textContent = stats.cardExpired;
+    document.getElementById('vcnt-annualExpired').textContent = stats.annualExpired;
+    document.getElementById('vcnt-incomplete').textContent = stats.incomplete;
+    document.getElementById('vcnt-inactive').textContent = stats.inactiveCars;
+}
+
+function switchVTab(tab) {
+    currentVTab = tab;
+    document.querySelectorAll('[data-vtab]').forEach(b => {
+        b.classList.toggle('active', b.dataset.vtab === tab);
+    });
+    document.getElementById('vehiclesSearch').value = '';
+    renderVehiclesTable();
+}
+
+function getFilteredVehicles() {
+    let v = [...allVehicles];
+    const term = (document.getElementById('vehiclesSearch').value || '').toLowerCase().trim();
+
+    if (currentVTab === 'dues') v = v.filter(c => c.hasDues);
+    else if (currentVTab === 'expired') v = v.filter(c => c.licenseExpired);
+    else if (currentVTab === 'soon') v = v.filter(c => c.licenseSoon);
+    else if (currentVTab === 'cardExpired') v = v.filter(c => c.cardExpired);
+    else if (currentVTab === 'annualExpired') v = v.filter(c => c.annualExpired);
+    else if (currentVTab === 'incomplete') v = v.filter(c => c.incomplete);
+    else if (currentVTab === 'inactive') v = v.filter(c => c.statusNormalized === 'inactive');
+
+    if (term) {
+        v = v.filter(c => {
+            return (c.plate || '').toLowerCase().includes(term) ||
+                   (c.userName || '').toLowerCase().includes(term) ||
+                   (c.brand || '').toLowerCase().includes(term) ||
+                   (c.model || '').toLowerCase().includes(term) ||
+                   (c.phone || '').toLowerCase().includes(term) ||
+                   (c.owner || '').toLowerCase().includes(term) ||
+                   String(c.userId || '').toLowerCase().includes(term);
+        });
+    }
+    return v;
+}
+
+function statusBadge(status) {
+    if (status === 'تعمل') return `<span class="badge badge-success">✓ ${status}</span>`;
+    if (status === 'لا تعمل') return `<span class="badge badge-danger">${status}</span>`;
+    return status ? `<span class="badge badge-neutral">${status}</span>` : '-';
+}
+
+function licenseStatusBadge(c) {
+    if (!c.licenseExpiry) return '<span class="badge badge-neutral">-</span>';
+    if (c.licenseExpired) return `<span class="badge badge-danger">❌ ${Math.abs(c.licenseDays)} يوم</span>`;
+    if (c.licenseSoon) return `<span class="badge badge-warning">⏰ ${c.licenseDays} يوم</span>`;
+    return `<span class="badge badge-success">✓ ${c.licenseDays} يوم</span>`;
+}
+
+function renderVehiclesTable() {
+    const vehicles = getFilteredVehicles();
+
+    const stripData = [
+        { label: 'العدد', value: fmt(vehicles.length) },
+        { label: 'إجمالي المستحق', value: fmtCurrency(vehicles.reduce((a, c) => a + c.totalAmount, 0)) },
+        { label: 'المُحصَّل', value: fmtCurrency(vehicles.reduce((a, c) => a + c.paid, 0)) },
+        { label: 'المتبقي', value: fmtCurrency(vehicles.reduce((a, c) => a + c.remaining, 0)) }
+    ];
+    document.getElementById('vehiclesSummary').innerHTML = stripData.map(s => `
+        <div class="summary-strip-item">
+            <span class="summary-strip-label">${s.label}</span>
+            <span class="summary-strip-value">${s.value}</span>
+        </div>
+    `).join('');
+
+    document.getElementById('vehiclesSubtitle').textContent = `عرض ${vehicles.length} من ${allVehicles.length} سيارة`;
+
+    if (vehicles.length === 0) {
+        document.getElementById('vehiclesTable').innerHTML = `
+            <thead><tr><th>لا توجد نتائج</th></tr></thead>
+            <tbody><tr><td style="text-align:center; padding: 40px; color: var(--text-tertiary);">لا توجد سيارات تطابق المعايير</td></tr></tbody>
+        `;
+        return;
+    }
+
+    const html = `
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اللوحة</th>
+                <th>المستخدم</th>
+                <th>المالك</th>
+                <th>الجوال</th>
+                <th>الماركة / الطراز</th>
+                <th>الحالة</th>
+                <th>انتهاء الرخصة</th>
+                <th>حالة الرخصة</th>
+                <th>المجموع</th>
+                <th>المدفوع</th>
+                <th>المتبقي</th>
+                <th>عدد الطلبات</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${vehicles.map((c, i) => {
+                let rowClass = '';
+                if (c.licenseExpired) rowClass = 'row-critical';
+                else if (c.licenseSoon || c.hasDues) rowClass = 'row-warning';
+                return `
+                <tr class="${rowClass} clickable" onclick="showVehicleModal('${c.plate.replace(/'/g, "\\'")}')">
+                    <td>${i + 1}</td>
+                    <td><strong>${c.plate}</strong></td>
+                    <td>${c.userName || '<span style="color:var(--ruby-glow); font-size: 11px;">⚠ فارغ</span>'}</td>
+                    <td>${c.owner ? `<span class="badge badge-purple">${c.owner}</span>` : '<span style="color:var(--amber-glow); font-size: 11px;">-</span>'}</td>
+                    <td><span class="num">${c.phone || '<span style="color:var(--amber-glow);">⚠</span>'}</span></td>
+                    <td>${c.brand}${c.model ? ' / ' + c.model : ''}</td>
+                    <td>${statusBadge(c.status)}</td>
+                    <td>${fmtDate(c.licenseExpiry)}</td>
+                    <td>${licenseStatusBadge(c)}</td>
+                    <td class="num">${fmt(c.totalAmount)}</td>
+                    <td class="num" style="color: var(--emerald-glow);">${fmt(c.paid)}</td>
+                    <td class="num"><strong style="color: ${c.remaining > 0 ? 'var(--ruby-glow)' : 'inherit'};">${fmt(c.remaining)}</strong></td>
+                    <td><span class="badge badge-info">${c.orders.length}</span></td>
+                </tr>
+            `;}).join('')}
+        </tbody>
+    `;
+    document.getElementById('vehiclesTable').innerHTML = html;
+}
+
+document.getElementById('vehiclesSearch').addEventListener('input', renderVehiclesTable);
+
+// =================== Modal تفاصيل السيارة ===================
+function showVehicleModal(plate) {
+    const v = allVehicles.find(x => x.plate === plate);
+    if (!v) return;
+
+    let ordersHtml = '';
+    if (v.orders.length > 0) {
+        ordersHtml = `
+            <div class="modal-section">
+                <div class="modal-section-title">📋 طلبات هذه السيارة (${v.orders.length})</div>
+                <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead><tr><th>#</th><th>النوع</th><th>التكلفة</th><th>المربح</th><th>المجموع</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th></tr></thead>
+                    <tbody>
+                        ${v.orders.map(o => `
+                            <tr>
+                                <td>${o.id}</td>
+                                <td><span class="badge badge-${o.type === 'سنوية' ? 'info' : 'cyan'}">${o.type}</span></td>
+                                <td class="num">${fmt(o.cost)}</td>
+                                <td class="num" style="color: var(--emerald-glow);">${fmt(o.profit)}</td>
+                                <td class="num">${fmt(o.total)}</td>
+                                <td class="num">${fmt(o.paid)}</td>
+                                <td class="num"><strong style="color: ${o.remaining > 0 ? 'var(--ruby-glow)' : 'inherit'};">${fmt(o.remaining)}</strong></td>
+                                <td>${o.payStatus === 'paid' ? '<span class="badge badge-success">✓ مدفوع</span>' : (o.payStatus === 'partial' ? '<span class="badge badge-warning">◐ جزئي</span>' : '<span class="badge badge-danger">⏳ لم يدفع</span>')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        `;
+    } else {
+        ordersHtml = `
+            <div class="modal-section">
+                <div class="modal-section-title">📋 الطلبات</div>
+                <p style="color: var(--text-tertiary); padding: 20px; text-align: center;">لا توجد طلبات مسجلة لهذه السيارة</p>
+            </div>
+        `;
+    }
+
+    document.getElementById('modalContent').innerHTML = `
+        <div class="modal-header">
+            <div>
+                <div class="modal-title">🚛 ${v.plate}</div>
+                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">${v.brand || ''} ${v.model || ''} ${v.year ? `(${v.year})` : ''}</div>
+            </div>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+
+        <div class="modal-section">
+            <div class="modal-section-title">معلومات السيارة</div>
+            <div class="detail-grid">
+                <div class="detail-item"><div class="detail-label">الحالة</div><div class="detail-value">${statusBadge(v.status)}</div></div>
+                <div class="detail-item"><div class="detail-label">نوع التسجيل</div><div class="detail-value">${v.regType || '-'}</div></div>
+                <div class="detail-item"><div class="detail-label">اللون</div><div class="detail-value">${v.color || '-'}</div></div>
+                <div class="detail-item"><div class="detail-label">الرقم التسلسلي</div><div class="detail-value num">${v.serial || '-'}</div></div>
+                <div class="detail-item"><div class="detail-label">تاريخ الملكية</div><div class="detail-value num">${fmtDate(v.ownershipDate)}</div></div>
+                <div class="detail-item"><div class="detail-label">انتهاء الرخصة</div><div class="detail-value num">${fmtDate(v.licenseExpiry)} ${licenseStatusBadge(v)}</div></div>
+                <div class="detail-item"><div class="detail-label">انتهاء كرت التشغيل</div><div class="detail-value num">${fmtDate(v.cardExpiry)}</div></div>
+                <div class="detail-item"><div class="detail-label">وضع الملصق</div><div class="detail-value">${v.sticker || '-'}</div></div>
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <div class="modal-section-title">بيانات المستخدم والمالك</div>
+            <div class="detail-grid">
+                <div class="detail-item"><div class="detail-label">اسم المستخدم</div><div class="detail-value">${v.userName || '-'}</div></div>
+                <div class="detail-item"><div class="detail-label">هوية المستخدم</div><div class="detail-value num">${v.userId || '-'}</div></div>
+                <div class="detail-item"><div class="detail-label">رقم الجوال</div><div class="detail-value num">${v.phone || '-'}</div></div>
+                <div class="detail-item"><div class="detail-label">المالك</div><div class="detail-value">${v.owner || '-'}</div></div>
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <div class="modal-section-title">السنوية والمالية</div>
+            <div class="detail-grid">
+                <div class="detail-item"><div class="detail-label">بداية السنوية</div><div class="detail-value num">${fmtDate(v.annualStart)}</div></div>
+                <div class="detail-item"><div class="detail-label">نهاية السنوية</div><div class="detail-value num">${fmtDate(v.annualEnd)}</div></div>
+                <div class="detail-item"><div class="detail-label">إجمالي المستحقات</div><div class="detail-value num">${fmtCurrency(v.totalAmount)}</div></div>
+                <div class="detail-item"><div class="detail-label">المدفوع</div><div class="detail-value num" style="color: var(--emerald-glow);">${fmtCurrency(v.paid)}</div></div>
+                <div class="detail-item"><div class="detail-label">الخصم</div><div class="detail-value num">${fmtCurrency(v.discount)}</div></div>
+                <div class="detail-item"><div class="detail-label">المتبقي</div><div class="detail-value num" style="color: ${v.remaining > 0 ? 'var(--ruby-glow)' : 'inherit'};">${fmtCurrency(v.remaining)}</div></div>
+            </div>
+        </div>
+
+        ${ordersHtml}
+
+        ${v.notes ? `
+            <div class="modal-section">
+                <div class="modal-section-title">ملاحظات</div>
+                <div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-value">${v.notes}</div></div>
+            </div>
+        ` : ''}
+    `;
+
+    document.getElementById('vehicleModal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('vehicleModal').classList.remove('active');
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+});
+
+// =================== جدول الطلبات ===================
+function renderOrderTabCounts(stats) {
+    document.getElementById('ocnt-all').textContent = stats.totalOrders;
+    document.getElementById('ocnt-unpaid').textContent = stats.unpaidOrders;
+    document.getElementById('ocnt-partial').textContent = stats.partialOrders;
+    document.getElementById('ocnt-paid').textContent = stats.paidOrders;
+    document.getElementById('ocnt-annual').textContent = stats.annualOrders;
+    document.getElementById('ocnt-other').textContent = stats.otherOrders;
+}
+
+function switchOTab(tab) {
+    currentOTab = tab;
+    document.querySelectorAll('[data-otab]').forEach(b => {
+        b.classList.toggle('active', b.dataset.otab === tab);
+    });
+    document.getElementById('ordersSearch').value = '';
+    renderOrdersTable();
+}
+
+function getFilteredOrders() {
+    let o = [...allOrders];
+    const term = (document.getElementById('ordersSearch').value || '').toLowerCase().trim();
+
+    if (currentOTab === 'unpaid') o = o.filter(x => x.payStatus === 'unpaid');
+    else if (currentOTab === 'partial') o = o.filter(x => x.payStatus === 'partial');
+    else if (currentOTab === 'paid') o = o.filter(x => x.payStatus === 'paid');
+    else if (currentOTab === 'annual') o = o.filter(x => x.type === 'سنوية');
+    else if (currentOTab === 'other') o = o.filter(x => x.type === 'أخرى');
+
+    if (term) {
+        o = o.filter(x => {
+            return String(x.id || '').toLowerCase().includes(term) ||
+                   (x.plate || '').toLowerCase().includes(term) ||
+                   (x.type || '').toLowerCase().includes(term) ||
+                   (x.serviceNotes || '').toLowerCase().includes(term);
+        });
+    }
+    return o;
+}
+
+function payStatusBadge(o) {
+    if (o.payStatus === 'paid') return '<span class="badge badge-success">✓ مدفوع</span>';
+    if (o.payStatus === 'partial') return '<span class="badge badge-warning">◐ جزئي</span>';
+    return '<span class="badge badge-danger">⏳ لم يدفع</span>';
+}
+
+function renderOrdersTable() {
+    const orders = getFilteredOrders();
+
+    const stripData = [
+        { label: 'العدد', value: fmt(orders.length) },
+        { label: 'مجموع التكلفة', value: fmtCurrency(orders.reduce((a, o) => a + o.cost, 0)) },
+        { label: 'مجموع الأرباح', value: fmtCurrency(orders.reduce((a, o) => a + o.profit, 0)) },
+        { label: 'مجموع المدفوع', value: fmtCurrency(orders.reduce((a, o) => a + o.paid, 0)) },
+        { label: 'مجموع المتبقي', value: fmtCurrency(orders.reduce((a, o) => a + o.remaining, 0)) }
+    ];
+    document.getElementById('ordersSummary').innerHTML = stripData.map(s => `
+        <div class="summary-strip-item">
+            <span class="summary-strip-label">${s.label}</span>
+            <span class="summary-strip-value">${s.value}</span>
+        </div>
+    `).join('');
+
+    document.getElementById('ordersSubtitle').textContent = `عرض ${orders.length} من ${allOrders.length} طلب`;
+
+    if (orders.length === 0) {
+        document.getElementById('ordersTable').innerHTML = `
+            <thead><tr><th>لا توجد نتائج</th></tr></thead>
+            <tbody><tr><td style="text-align:center; padding: 40px; color: var(--text-tertiary);">لا توجد طلبات تطابق المعايير</td></tr></tbody>
+        `;
+        return;
+    }
+
+    const html = `
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اللوحة</th>
+                <th>المستخدم</th>
+                <th>النوع</th>
+                <th>الخدمة</th>
+                <th>التكلفة</th>
+                <th>المربح</th>
+                <th>المجموع</th>
+                <th>المدفوع</th>
+                <th>المتبقي</th>
+                <th>الحالة</th>
+                <th>الهامش</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${orders.map(o => {
+                let rowClass = '';
+                if (o.payStatus === 'unpaid') rowClass = 'row-critical';
+                else if (o.payStatus === 'partial') rowClass = 'row-warning';
+                const user = o.vehicleData ? o.vehicleData.userName : '';
+                return `
+                <tr class="${rowClass}">
+                    <td>${o.id}</td>
+                    <td><strong>${o.plate}</strong></td>
+                    <td>${user || '<span style="color:var(--text-muted); font-size: 11px;">-</span>'}</td>
+                    <td><span class="badge badge-${o.type === 'سنوية' ? 'info' : 'cyan'}">${o.type}</span></td>
+                    <td>${o.serviceNotes || '-'}</td>
+                    <td class="num">${fmt(o.cost)}</td>
+                    <td class="num" style="color: var(--emerald-glow);">${fmt(o.profit)}</td>
+                    <td class="num"><strong>${fmt(o.total)}</strong></td>
+                    <td class="num">${fmt(o.paid)}</td>
+                    <td class="num"><strong style="color: ${o.remaining > 0 ? 'var(--ruby-glow)' : 'inherit'};">${fmt(o.remaining)}</strong></td>
+                    <td>${payStatusBadge(o)}</td>
+                    <td class="num">${(o.margin * 100).toFixed(0)}%</td>
+                </tr>
+            `;}).join('')}
+        </tbody>
+    `;
+    document.getElementById('ordersTable').innerHTML = html;
+}
+
+document.getElementById('ordersSearch').addEventListener('input', renderOrdersTable);
+
+// =================== جدول الذمم المدينة ===================
+function renderReceivablesTable() {
+    const term = (document.getElementById('receivablesSearch').value || '').toLowerCase().trim();
+    let dues = allVehicles.filter(v => v.hasDues).sort((a, b) => b.remaining - a.remaining);
+
+    if (term) {
+        dues = dues.filter(v => {
+            return (v.plate || '').toLowerCase().includes(term) ||
+                   (v.userName || '').toLowerCase().includes(term) ||
+                   (v.owner || '').toLowerCase().includes(term) ||
+                   (v.phone || '').toLowerCase().includes(term);
+        });
+    }
+
+    const totalDues = dues.reduce((a, v) => a + v.remaining, 0);
+
+    const stripData = [
+        { label: 'العملاء المتأخرون', value: fmt(dues.length) },
+        { label: 'إجمالي الذمم', value: fmtCurrency(totalDues) },
+        { label: 'متوسط المتبقي', value: dues.length > 0 ? fmtCurrency(totalDues / dues.length) : '-' },
+        { label: 'أكبر متبقي', value: dues.length > 0 ? fmtCurrency(dues[0].remaining) : '-' }
+    ];
+    document.getElementById('receivablesSummary').innerHTML = stripData.map(s => `
+        <div class="summary-strip-item">
+            <span class="summary-strip-label">${s.label}</span>
+            <span class="summary-strip-value">${s.value}</span>
+        </div>
+    `).join('');
+
+    document.getElementById('receivablesSubtitle').textContent = `${dues.length} عميل عليه متبقي`;
+
+    if (dues.length === 0) {
+        document.getElementById('receivablesTable').innerHTML = `
+            <thead><tr><th>الحالة</th></tr></thead>
+            <tbody><tr><td style="text-align:center; padding: 40px; color: var(--emerald-glow);">🎉 لا يوجد متأخرون</td></tr></tbody>
+        `;
+        return;
+    }
+
+    const html = `
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اللوحة</th>
+                <th>المستخدم</th>
+                <th>المالك</th>
+                <th>الجوال</th>
+                <th>المجموع</th>
+                <th>المدفوع</th>
+                <th>الخصم</th>
+                <th>المتبقي</th>
+                <th>نسبة التحصيل</th>
+                <th>تواصل</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${dues.map((v, i) => {
+                const rate = v.totalAmount > 0 ? (v.paid / v.totalAmount * 100).toFixed(0) : 0;
+                const whatsappUrl = v.phone ? `https://wa.me/966${v.phone.replace(/^0/, '')}` : null;
+                return `
+                <tr class="row-critical clickable" onclick="event.target.tagName !== 'A' && showVehicleModal('${v.plate.replace(/'/g, "\\'")}')">
+                    <td><strong>${i + 1}</strong></td>
+                    <td><strong>${v.plate}</strong></td>
+                    <td>${v.userName || '<span style="color:var(--ruby-glow); font-size: 11px;">⚠ فارغ</span>'}</td>
+                    <td>${v.owner ? `<span class="badge badge-purple">${v.owner}</span>` : '-'}</td>
+                    <td><span class="num">${v.phone || '<span style="color:var(--amber-glow);">⚠</span>'}</span></td>
+                    <td class="num">${fmt(v.totalAmount)}</td>
+                    <td class="num" style="color: var(--emerald-glow);">${fmt(v.paid)}</td>
+                    <td class="num">${fmt(v.discount)}</td>
+                    <td class="num"><strong style="color: var(--ruby-glow); font-size: 14px;">${fmt(v.remaining)}</strong></td>
+                    <td class="num">${rate}%</td>
+                    <td>${whatsappUrl ? `<a href="${whatsappUrl}" target="_blank" class="badge badge-success" style="text-decoration: none;">💬 واتساب</a>` : '-'}</td>
+                </tr>
+            `;}).join('')}
+        </tbody>
+    `;
+    document.getElementById('receivablesTable').innerHTML = html;
+}
+
+document.getElementById('receivablesSearch').addEventListener('input', renderReceivablesTable);
+
+// =================== التصدير ===================
+function downloadCSV(filename, headers, rows) {
+    let csv = '\uFEFF' + headers.join(',') + '\n';
+    rows.forEach(r => {
+        csv += r.map(v => {
+            const s = String(v == null ? '' : v);
+            return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
+        }).join(',') + '\n';
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function exportVehicles() {
+    const vehicles = getFilteredVehicles();
+    if (vehicles.length === 0) return alert('لا توجد بيانات للتصدير');
+    const headers = ['رقم اللوحة', 'الحالة', 'الماركة', 'الطراز', 'المستخدم', 'الجوال', 'المالك',
+                     'انتهاء الرخصة', 'الأيام المتبقية', 'المجموع', 'المدفوع', 'الخصم', 'المتبقي', 'عدد الطلبات'];
+    const rows = vehicles.map(v => [
+        v.plate, v.status, v.brand, v.model, v.userName, v.phone || '', v.owner,
+        fmtDate(v.licenseExpiry), v.licenseDays !== null ? v.licenseDays : '',
+        v.totalAmount, v.paid, v.discount, v.remaining, v.orders.length
+    ]);
+    const tabNames = {
+        all: 'جميع_السيارات', dues: 'سيارات_عليها_متبقي',
+        expired: 'رخص_منتهية', soon: 'رخص_قريبة',
+        cardExpired: 'كروت_منتهية', annualExpired: 'سنوية_منتهية',
+        incomplete: 'بيانات_ناقصة', inactive: 'سيارات_غير_نشطة'
+    };
+    downloadCSV(tabNames[currentVTab] || 'vehicles', headers, rows);
+}
+
+function exportOrders() {
+    const orders = getFilteredOrders();
+    if (orders.length === 0) return alert('لا توجد بيانات للتصدير');
+    const headers = ['رقم الطلب', 'اللوحة', 'المستخدم', 'النوع', 'الخدمة', 'التكلفة', 'المربح',
+                     'الخصم', 'المجموع', 'المدفوع', 'المتبقي', 'الحالة', 'الهامش %'];
+    const rows = orders.map(o => [
+        o.id, o.plate, o.vehicleData ? o.vehicleData.userName : '', o.type, o.serviceNotes,
+        o.cost, o.profit, o.discount, o.total, o.paid, o.remaining,
+        o.payStatus === 'paid' ? 'مدفوع' : (o.payStatus === 'partial' ? 'جزئي' : 'لم يدفع'),
+        (o.margin * 100).toFixed(1)
+    ]);
+    const tabNames = {
+        all: 'جميع_الطلبات', unpaid: 'طلبات_غير_مدفوعة',
+        partial: 'طلبات_جزئية', paid: 'طلبات_مدفوعة',
+        annual: 'طلبات_سنوية', other: 'طلبات_أخرى'
+    };
+    downloadCSV(tabNames[currentOTab] || 'orders', headers, rows);
+}
+
+function exportReceivables() {
+    const dues = allVehicles.filter(v => v.hasDues).sort((a, b) => b.remaining - a.remaining);
+    if (dues.length === 0) return alert('لا يوجد متأخرون');
+    const headers = ['الترتيب', 'اللوحة', 'المستخدم', 'المالك', 'الجوال', 'المجموع', 'المدفوع', 'الخصم', 'المتبقي', 'نسبة التحصيل %'];
+    const rows = dues.map((v, i) => [
+        i + 1, v.plate, v.userName, v.owner, v.phone || '',
+        v.totalAmount, v.paid, v.discount, v.remaining,
+        v.totalAmount > 0 ? (v.paid / v.totalAmount * 100).toFixed(1) : 0
+    ]);
+    downloadCSV('قائمة_المتأخرين', headers, rows);
+}
+
+// =================== توزيع الأرباح ===================
+function renderPartnersTab() {
+    if (!settlementData) {
+        document.getElementById('settlementHero').innerHTML = `
+            <div style="padding: 40px; color: var(--text-tertiary); font-size: 15px;">
+                ⚠️ لم يتم العثور على ورقة "المحاصلة" في الملف
+            </div>
+        `;
+        document.getElementById('partnersGrid').innerHTML = '';
+        document.getElementById('settlementTable').innerHTML = '';
+        document.getElementById('transfersTable').innerHTML = '';
+        document.getElementById('transfersSummary').innerHTML = '';
+        return;
+    }
+
+    const s = settlementData;
+
+    // 1. Hero - النتيجة النهائية
+    let heroClass = 'balanced';
+    let heroLabel = '✓ التسوية متوازنة';
+    let heroSubtitle = 'تم تحويل المستحقات بالكامل';
+    if (s.hRemainingAtM > 0) {
+        heroClass = 'due';
+        heroLabel = '⏳ مطلوب من م تحويله لـ هـ';
+        heroSubtitle = `يستحق هشام ${fmtCurrency(s.hRemainingAtM)} عند مؤيد`;
+    } else if (s.hRemainingAtM < 0) {
+        heroClass = 'overpaid';
+        heroLabel = '⚠️ م حوّل أكثر من اللازم';
+        heroSubtitle = `الزائد ${fmtCurrency(Math.abs(s.hRemainingAtM))}`;
+    }
+
+    document.getElementById('settlementHero').innerHTML = `
+        <div class="settlement-hero-label">${heroLabel}</div>
+        <div class="settlement-hero-value ${heroClass}">${fmtCurrency(Math.abs(s.hRemainingAtM))}</div>
+        <div class="settlement-hero-status">${heroSubtitle}</div>
+        <div style="margin-top: 18px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <div style="padding: 8px 16px; background: var(--bg-glass); border-radius: 10px; font-size: 12px;">
+                <span style="color: var(--text-tertiary);">المستحق لـ هـ: </span>
+                <span style="font-family: var(--font-mono); font-weight: 700; color: var(--gold-bright); direction: ltr; display: inline-block;">${fmtCurrency(s.hDueBeforeTransfers)}</span>
+            </div>
+            <div style="padding: 8px 16px; background: var(--bg-glass); border-radius: 10px; font-size: 12px;">
+                <span style="color: var(--text-tertiary);">ما تم تحويله: </span>
+                <span style="font-family: var(--font-mono); font-weight: 700; color: var(--emerald-glow); direction: ltr; display: inline-block;">${fmtCurrency(s.actuallyTransferred)}</span>
+            </div>
+        </div>
+    `;
+
+    // 2. بطاقات الشركاء
+    const mPct = s.totalProfit.total > 0 ? (s.shareProfit.m / s.totalProfit.total * 100) : 0;
+    const hPct = s.totalProfit.total > 0 ? (s.shareProfit.h / s.totalProfit.total * 100) : 0;
+
+    document.getElementById('partnersGrid').innerHTML = `
+        <div class="partner-card partner-m">
+            <div class="partner-card-header">
+                <div class="partner-avatar">م</div>
+                <div>
+                    <div class="partner-name">مؤيد</div>
+                    <div class="partner-role">الشريك (م) • ${mPct.toFixed(1)}% من المربح</div>
+                </div>
+            </div>
+            <div class="partner-rows">
+                <div class="partner-row">
+                    <span class="partner-row-label">حصته من المربح</span>
+                    <span class="partner-row-value" style="color: var(--emerald-glow);">${fmtCurrency(s.shareProfit.m)}</span>
+                </div>
+                <div class="partner-row">
+                    <span class="partner-row-label">حصته من التكاليف</span>
+                    <span class="partner-row-value" style="color: var(--ruby-glow);">${fmtCurrency(s.shareCosts.m)}</span>
+                </div>
+                <div class="partner-row highlight">
+                    <span class="partner-row-label">إجمالي ما يستحقه</span>
+                    <span class="partner-row-value">${fmtCurrency(s.totalDue.m)}</span>
+                </div>
+                <div class="partner-row">
+                    <span class="partner-row-label">ما استلمه فعلياً</span>
+                    <span class="partner-row-value">${fmtCurrency(s.actuallyReceived.m)}</span>
+                </div>
+            </div>
+            <div class="partner-balance">
+                <div class="partner-balance-label">صافي المقاسمة (استلم − يستحق)</div>
+                <div class="partner-balance-value ${s.mNet >= 0 ? 'positive' : 'negative'}">${fmtCurrency(s.mNet)}</div>
+                <div class="partner-balance-note">${s.mNet < 0 ? 'استلم أقل مما يستحق' : (s.mNet > 0 ? 'استلم أكثر مما يستحق' : 'متوازن')}</div>
+            </div>
+        </div>
+
+        <div class="partner-card partner-h">
+            <div class="partner-card-header">
+                <div class="partner-avatar">هـ</div>
+                <div>
+                    <div class="partner-name">هشام</div>
+                    <div class="partner-role">الشريك (هـ) • ${hPct.toFixed(1)}% من المربح</div>
+                </div>
+            </div>
+            <div class="partner-rows">
+                <div class="partner-row">
+                    <span class="partner-row-label">حصته من المربح</span>
+                    <span class="partner-row-value" style="color: var(--emerald-glow);">${fmtCurrency(s.shareProfit.h)}</span>
+                </div>
+                <div class="partner-row">
+                    <span class="partner-row-label">حصته من التكاليف</span>
+                    <span class="partner-row-value">${fmtCurrency(s.shareCosts.h)}</span>
+                </div>
+                <div class="partner-row highlight">
+                    <span class="partner-row-label">إجمالي ما يستحقه</span>
+                    <span class="partner-row-value">${fmtCurrency(s.totalDue.h)}</span>
+                </div>
+                <div class="partner-row">
+                    <span class="partner-row-label">ما استلمه فعلياً</span>
+                    <span class="partner-row-value">${fmtCurrency(s.actuallyReceived.h)}</span>
+                </div>
+            </div>
+            <div class="partner-balance">
+                <div class="partner-balance-label">المستحق لـ هـ من م</div>
+                <div class="partner-balance-value ${s.hDueFromM > 0 ? 'positive' : ''}">${fmtCurrency(s.hDueFromM)}</div>
+                <div class="partner-balance-note">قبل احتساب التحويلات</div>
+            </div>
+        </div>
+    `;
+
+    // 3. جدول المقاسمة التفصيلي
+    document.getElementById('settlementTable').innerHTML = `
+        <table class="settlement-table">
+            <thead>
+                <tr>
+                    <th>البند</th>
+                    <th class="col-m">مؤيد (م)</th>
+                    <th class="col-h">هشام (هـ)</th>
+                    <th>المجموع</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="section-header"><td colspan="4">الإجماليات</td></tr>
+                <tr>
+                    <td>إجمالي المربح (الأرباح)</td>
+                    <td class="num col-m-bg">${fmt(s.totalProfit.m, 2)}</td>
+                    <td class="num col-h-bg">${fmt(s.totalProfit.h, 2)}</td>
+                    <td class="num"><strong>${fmt(s.totalProfit.total, 2)}</strong></td>
+                </tr>
+                <tr>
+                    <td>إجمالي التكاليف</td>
+                    <td class="num col-m-bg">${fmt(s.totalCosts.m, 2)}</td>
+                    <td class="num col-h-bg">-</td>
+                    <td class="num"><strong>${fmt(s.totalCosts.total, 2)}</strong></td>
+                </tr>
+                <tr>
+                    <td>إجمالي المجموع (تكلفة + مربح)</td>
+                    <td class="num col-m-bg">${fmt(s.totalSum.m, 2)}</td>
+                    <td class="num col-h-bg">${fmt(s.totalSum.h, 2)}</td>
+                    <td class="num"><strong>${fmt(s.totalSum.total, 2)}</strong></td>
+                </tr>
+                <tr>
+                    <td>إجمالي المدفوعات (مُستلمة عند م)</td>
+                    <td class="num col-m-bg">${fmt(s.totalPaid.m, 2)}</td>
+                    <td class="num col-h-bg">-</td>
+                    <td class="num"><strong>${fmt(s.totalPaid.total, 2)}</strong></td>
+                </tr>
+                <tr>
+                    <td>إجمالي المتبقي (لم يُحصّل)</td>
+                    <td class="num col-m-bg">${fmt(s.totalRemaining.m, 2)}</td>
+                    <td class="num col-h-bg">-</td>
+                    <td class="num"><strong style="color: var(--ruby-glow);">${fmt(s.totalRemaining.total, 2)}</strong></td>
+                </tr>
+
+                <tr class="section-header"><td colspan="4">المقاسمة</td></tr>
+                <tr>
+                    <td>حصته من المربح</td>
+                    <td class="num col-m-bg">${fmt(s.shareProfit.m, 2)}</td>
+                    <td class="num col-h-bg">${fmt(s.shareProfit.h, 2)}</td>
+                    <td class="num">-</td>
+                </tr>
+                <tr>
+                    <td>حصته من التكاليف</td>
+                    <td class="num col-m-bg">${fmt(s.shareCosts.m, 2)}</td>
+                    <td class="num col-h-bg">${fmt(s.shareCosts.h, 2)}</td>
+                    <td class="num">-</td>
+                </tr>
+                <tr class="highlight-row">
+                    <td>إجمالي ما يستحقه</td>
+                    <td class="num col-m-bg">${fmt(s.totalDue.m, 2)}</td>
+                    <td class="num col-h-bg">${fmt(s.totalDue.h, 2)}</td>
+                    <td class="num">-</td>
+                </tr>
+                <tr>
+                    <td>ما استلمه م فعلياً</td>
+                    <td class="num col-m-bg">${fmt(s.actuallyReceived.m, 2)}</td>
+                    <td class="num col-h-bg">${fmt(s.actuallyReceived.h, 2)}</td>
+                    <td class="num">-</td>
+                </tr>
+
+                <tr class="section-header"><td colspan="4">صافي المقاسمة</td></tr>
+                <tr>
+                    <td>م: استلم أكثر/أقل مما يستحق</td>
+                    <td class="num col-m-bg" style="color: ${s.mNet < 0 ? 'var(--ruby-glow)' : 'var(--emerald-glow)'}; font-weight: 700;">${fmt(s.mNet, 2)}</td>
+                    <td class="num">-</td>
+                    <td class="num">-</td>
+                </tr>
+                <tr>
+                    <td>هـ: يستحق أن يستلم من م</td>
+                    <td class="num">-</td>
+                    <td class="num col-h-bg" style="color: var(--gold-bright); font-weight: 700;">${fmt(s.hDueFromM, 2)}</td>
+                    <td class="num">-</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+
+    // 4. سجل التحويلات
+    if (s.transfers.length > 0) {
+        document.getElementById('transfersSummary').innerHTML = `
+            <div class="summary-strip-item">
+                <span class="summary-strip-label">عدد التحويلات</span>
+                <span class="summary-strip-value">${s.transfers.length}</span>
+            </div>
+            <div class="summary-strip-item">
+                <span class="summary-strip-label">إجمالي المُحوَّل</span>
+                <span class="summary-strip-value">${fmtCurrency(s.totalTransferred)}</span>
+            </div>
+            <div class="summary-strip-item">
+                <span class="summary-strip-label">المتبقي لـ هـ عند م</span>
+                <span class="summary-strip-value" style="color: ${s.hRemainingAtM > 0 ? 'var(--amber-glow)' : (s.hRemainingAtM < 0 ? 'var(--ruby-glow)' : 'var(--emerald-glow)')};">${fmt(s.hRemainingAtM, 2)}</span>
+            </div>
+        `;
+
+        document.getElementById('transfersTable').innerHTML = `
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>التاريخ</th>
+                    <th>المبلغ</th>
+                    <th>ملاحظات</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${s.transfers.map((t, i) => `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td class="num">${fmtDate(t.date)}</td>
+                        <td class="num" style="color: var(--emerald-glow); font-weight: 700;">${fmt(t.amount, 2)}</td>
+                        <td>${t.notes || '-'}</td>
+                    </tr>
+                `).join('')}
+                <tr style="background: var(--bg-glass); font-weight: 700;">
+                    <td colspan="2" style="text-align: center;">الإجمالي</td>
+                    <td class="num" style="color: var(--gold-bright);">${fmt(s.totalTransferred, 2)}</td>
+                    <td>-</td>
+                </tr>
+            </tbody>
+        `;
+    } else {
+        document.getElementById('transfersSummary').innerHTML = '';
+        document.getElementById('transfersTable').innerHTML = `
+            <thead><tr><th>الحالة</th></tr></thead>
+            <tbody><tr><td style="text-align:center; padding: 40px; color: var(--text-tertiary);">لا توجد تحويلات مسجلة بعد</td></tr></tbody>
+        `;
+    }
+
+    // 5. الرسوم البيانية
+    renderPartnerCharts();
+}
+
+function renderPartnerCharts() {
+    if (!settlementData) return;
+    const s = settlementData;
+
+    if (charts.profitSplit) charts.profitSplit.destroy();
+    if (charts.settlementFlow) charts.settlementFlow.destroy();
+
+    charts.profitSplit = new Chart(document.getElementById('profitSplitChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['مؤيد (م)', 'هشام (هـ)'],
+            datasets: [{
+                data: [s.shareProfit.m, s.shareProfit.h],
+                backgroundColor: ['#3b82f6', '#f59e0b'],
+                borderWidth: 0, hoverOffset: 12
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '60%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 14, padding: 14, font: { size: 13 } } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const pct = s.totalProfit.total > 0 ? (ctx.parsed / s.totalProfit.total * 100).toFixed(1) : 0;
+                            return `${ctx.label}: ${fmtCurrency(ctx.parsed)} (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    charts.settlementFlow = new Chart(document.getElementById('settlementFlowChart'), {
+        type: 'bar',
+        data: {
+            labels: ['المستحق لـ هـ', 'المُحوَّل فعلاً', 'المتبقي'],
+            datasets: [{
+                data: [s.hDueBeforeTransfers, s.actuallyTransferred, Math.abs(s.hRemainingAtM)],
+                backgroundColor: [
+                    'rgba(212, 175, 55, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    s.hRemainingAtM > 0 ? 'rgba(245, 158, 11, 0.8)' : (s.hRemainingAtM < 0 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(16, 185, 129, 0.8)')
+                ],
+                borderRadius: 8, borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => fmtCurrency(ctx.parsed.y) } }
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { color: getChartGridColor() }, beginAtZero: true, ticks: { callback: v => fmt(v) } }
+            }
+        }
+    });
+}
+
+// =================== المساعد الذكي ===================
+function askAI(question) {
+    if (typeof question !== 'string') {
+        question = document.getElementById('aiInput').value.trim();
+    } else {
+        document.getElementById('aiInput').value = question;
+    }
+    if (!question) return;
+
+    const responseEl = document.getElementById('aiResponse');
+    responseEl.classList.add('active');
+    responseEl.innerHTML = `
+        <div class="ai-thinking">
+            <span>أفكر</span>
+            <span class="ai-thinking-dots"><span></span><span></span><span></span></span>
+        </div>
+    `;
+
+    // محاكاة وقت تفكير قصير للإحساس
+    setTimeout(() => {
+        const answer = generateAIAnswer(question);
+        responseEl.innerHTML = `
+            <div class="ai-response-header">
+                <span>✨</span>
+                <span>إجابة المساعد الذكي</span>
+                <span style="margin-right: auto; opacity: 0.6;">${new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+            <div class="ai-response-content">${answer}</div>
+        `;
+    }, 300);
+}
+
+function stat(value) {
+    return `<span class="ai-stat">${value}</span>`;
+}
+
+function generateAIAnswer(question) {
+    const q = question.toLowerCase().trim();
+    const today = new Date();
+
+    // ===== أسئلة عن العدد الإجمالي =====
+    if (/كم سيار|عدد السيار|إجمالي السيار/.test(q)) {
+        const active = allVehicles.filter(v => v.statusNormalized === 'active').length;
+        const inactive = allVehicles.filter(v => v.statusNormalized === 'inactive').length;
+        return `لديك ${stat(allVehicles.length)} سيارة في السجل، منها ${stat(active)} نشطة و ${stat(inactive)} متوقفة.`;
+    }
+
+    if (/كم نشط|سيارات نشط|كم تعمل/.test(q)) {
+        const active = allVehicles.filter(v => v.statusNormalized === 'active').length;
+        return `يوجد ${stat(active)} سيارة نشطة (تعمل) من إجمالي ${stat(allVehicles.length)} سيارة.`;
+    }
+
+    // ===== أسئلة الشركاء =====
+    if (/(رصيد|حساب|كم).*(مؤيد|م\b)/.test(q) && settlementData) {
+        const s = settlementData;
+        return `الشريك مؤيد (م):
+            <ul class="ai-list">
+                <li>حصته من المربح: ${stat(fmtCurrency(s.shareProfit.m))}</li>
+                <li>حصته من التكاليف: ${stat(fmtCurrency(s.shareCosts.m))}</li>
+                <li>إجمالي ما يستحقه: ${stat(fmtCurrency(s.totalDue.m))}</li>
+                <li>ما استلمه فعلياً: ${stat(fmtCurrency(s.actuallyReceived.m))}</li>
+                <li>صافي المقاسمة: ${stat(fmtCurrency(s.mNet))} ${s.mNet < 0 ? '(استلم أقل)' : (s.mNet > 0 ? '(استلم أكثر)' : '(متوازن)')}</li>
+            </ul>`;
+    }
+
+    if (/(يستحق|رصيد|حساب|كم).*(هشام|هـ\b|ه\b)/.test(q) && settlementData) {
+        const s = settlementData;
+        return `الشريك هشام (هـ):
+            <ul class="ai-list">
+                <li>حصته من المربح: ${stat(fmtCurrency(s.shareProfit.h))}</li>
+                <li>إجمالي ما يستحقه: ${stat(fmtCurrency(s.totalDue.h))}</li>
+                <li>المستحق له من م (قبل التحويلات): ${stat(fmtCurrency(s.hDueBeforeTransfers))}</li>
+                <li>ما تم تحويله فعلياً: ${stat(fmtCurrency(s.actuallyTransferred))}</li>
+                <li>المتبقي لـ هـ عند م الآن: ${stat(fmtCurrency(s.hRemainingAtM))} ${s.hRemainingAtM === 0 ? '✓ (متوازن)' : ''}</li>
+            </ul>`;
+    }
+
+    if (/توزيع الأرباح|مقاسم|نسبة الشركاء/.test(q) && settlementData) {
+        const s = settlementData;
+        const mPct = s.totalProfit.total > 0 ? (s.shareProfit.m / s.totalProfit.total * 100).toFixed(1) : 0;
+        const hPct = s.totalProfit.total > 0 ? (s.shareProfit.h / s.totalProfit.total * 100).toFixed(1) : 0;
+        return `توزيع الأرباح بين الشريكين:
+            <ul class="ai-list">
+                <li>إجمالي المربح: ${stat(fmtCurrency(s.totalProfit.total))}</li>
+                <li>مؤيد (م): ${stat(fmtCurrency(s.shareProfit.m))} (${mPct}%)</li>
+                <li>هشام (هـ): ${stat(fmtCurrency(s.shareProfit.h))} (${hPct}%)</li>
+            </ul>
+            ملاحظة: التكاليف ${stat(fmtCurrency(s.totalCosts.total))} يتحملها مؤيد وحده.`;
+    }
+
+    // ===== أسئلة المتأخرين =====
+    if (/أعلى|أكبر|أكثر.*(متأخر|عليهم|متبقي|دين)/.test(q) || /كبار المتأخرين/.test(q)) {
+        const dues = allVehicles.filter(v => v.hasDues).sort((a, b) => b.remaining - a.remaining).slice(0, 5);
+        if (dues.length === 0) return `🎉 لا يوجد متأخرون حالياً، كل العملاء سددوا مستحقاتهم.`;
+        let html = `أعلى ${stat(dues.length)} عملاء عليهم متبقي:<ul class="ai-list">`;
+        dues.forEach((v, i) => {
+            html += `<li><strong>${i+1}.</strong> ${v.plate} — ${v.userName || 'غير محدد'} — متبقي ${stat(fmtCurrency(v.remaining))}${v.phone ? ' • 📱 ' + v.phone : ''}</li>`;
+        });
+        html += '</ul>';
+        return html;
+    }
+
+    if (/كم.*(متأخر|عليهم متبقي|عميل)/.test(q) || /عدد المتأخرين/.test(q)) {
+        const dues = allVehicles.filter(v => v.hasDues);
+        const total = dues.reduce((a, v) => a + v.remaining, 0);
+        return `يوجد ${stat(dues.length)} عميل عليهم متبقي بإجمالي ${stat(fmtCurrency(total))}.`;
+    }
+
+    // ===== أسئلة بدون جوال / اسم =====
+    if (/بدون جوال|ما عنده جوال|بلا جوال|بدون رقم/.test(q)) {
+        const noPhone = allVehicles.filter(v => !v.phone);
+        if (noPhone.length === 0) return `✓ كل السيارات لديها أرقام جوال مسجلة.`;
+        let html = `يوجد ${stat(noPhone.length)} سيارة بدون جوال`;
+        if (noPhone.length <= 10) {
+            html += ':<ul class="ai-list">';
+            noPhone.forEach(v => html += `<li>${v.plate} — ${v.userName || 'بدون اسم'}</li>`);
+            html += '</ul>';
+        } else {
+            html += `. الأرقام الناقصة تمثل ${((noPhone.length / allVehicles.length) * 100).toFixed(0)}% من الأسطول.`;
+        }
+        return html;
+    }
+
+    if (/بدون اسم|بدون مستخدم|بلا اسم/.test(q)) {
+        const noName = allVehicles.filter(v => !v.userName);
+        if (noName.length === 0) return `✓ كل السيارات لديها أسماء مستخدمين.`;
+        let html = `يوجد ${stat(noName.length)} سيارة بدون اسم مستخدم`;
+        if (noName.length <= 10) {
+            html += ':<ul class="ai-list">';
+            noName.forEach(v => html += `<li>${v.plate} — ${v.brand || ''} ${v.model || ''}</li>`);
+            html += '</ul>';
+        }
+        return html;
+    }
+
+    // ===== أسئلة الرخص =====
+    if (/(رخص|رخصة).*(منته|انتهت)/.test(q) || /رخص منتهية/.test(q)) {
+        const expired = allVehicles.filter(v => v.licenseExpired);
+        if (expired.length === 0) return `✓ لا توجد رخص منتهية، كل الرخص سارية.`;
+        let html = `يوجد ${stat(expired.length)} رخصة منتهية`;
+        if (expired.length <= 10) {
+            html += ':<ul class="ai-list">';
+            expired.forEach(v => html += `<li>${v.plate} — ${v.userName || ''} — منتهية منذ ${stat(Math.abs(v.licenseDays))} يوم</li>`);
+            html += '</ul>';
+        }
+        return html;
+    }
+
+    if (/(رخص|رخصة).*(قريب|تنتهي|شهر|30)/.test(q) || /رخص.*ستنتهي/.test(q)) {
+        const soon = allVehicles.filter(v => v.licenseSoon).sort((a, b) => a.licenseDays - b.licenseDays);
+        if (soon.length === 0) return `✓ لا توجد رخص ستنتهي خلال الـ 30 يوماً القادمة.`;
+        let html = `يوجد ${stat(soon.length)} رخصة ستنتهي خلال 30 يوم:<ul class="ai-list">`;
+        soon.slice(0, 10).forEach(v => html += `<li>${v.plate} — ${v.userName || ''} — بعد ${stat(v.licenseDays)} يوم${v.phone ? ' • 📱 ' + v.phone : ''}</li>`);
+        html += '</ul>';
+        return html;
+    }
+
+    // ===== أسئلة الأرباح =====
+    if (/أرباح.*السنوية|إيراد.*سنوية|ربح.*سنوية/.test(q)) {
+        const annual = allOrders.filter(o => o.type === 'سنوية');
+        const profit = annual.reduce((a, o) => a + o.profit, 0);
+        const cost = annual.reduce((a, o) => a + o.cost, 0);
+        return `إيرادات الطلبات السنوية:
+            <ul class="ai-list">
+                <li>عدد الطلبات: ${stat(annual.length)}</li>
+                <li>إجمالي التكلفة: ${stat(fmtCurrency(cost))}</li>
+                <li>إجمالي الربح: ${stat(fmtCurrency(profit))}</li>
+                <li>متوسط الربح للطلب: ${stat(fmtCurrency(annual.length > 0 ? profit / annual.length : 0))}</li>
+            </ul>`;
+    }
+
+    if (/أرباح.*أخرى|إيراد.*أخرى|ربح.*أخرى/.test(q)) {
+        const other = allOrders.filter(o => o.type === 'أخرى');
+        const profit = other.reduce((a, o) => a + o.profit, 0);
+        const cost = other.reduce((a, o) => a + o.cost, 0);
+        return `إيرادات الخدمات الأخرى:
+            <ul class="ai-list">
+                <li>عدد الطلبات: ${stat(other.length)}</li>
+                <li>إجمالي التكلفة: ${stat(fmtCurrency(cost))}</li>
+                <li>إجمالي الربح: ${stat(fmtCurrency(profit))}</li>
+                <li>متوسط الربح للطلب: ${stat(fmtCurrency(other.length > 0 ? profit / other.length : 0))}</li>
+            </ul>`;
+    }
+
+    if (/إجمالي.*أرباح|إجمالي.*ربح|كم ربحت|كم الربح/.test(q)) {
+        const totalProfit = allOrders.reduce((a, o) => a + o.profit, 0);
+        const totalSum = allOrders.reduce((a, o) => a + o.total, 0);
+        const margin = totalSum > 0 ? (totalProfit / totalSum * 100).toFixed(1) : 0;
+        return `إجمالي الأرباح من ${stat(allOrders.length)} طلب: ${stat(fmtCurrency(totalProfit))} بهامش ربح ${stat(margin + '%')}.`;
+    }
+
+    // ===== نسبة التحصيل =====
+    if (/نسبة التحصيل|كم محصل|محصلت|نسبة المدفوع/.test(q)) {
+        const totalAmount = allVehicles.reduce((a, v) => a + v.totalAmount, 0);
+        const totalPaid = allVehicles.reduce((a, v) => a + v.paid, 0);
+        const totalRem = allVehicles.reduce((a, v) => a + v.remaining, 0);
+        const rate = totalAmount > 0 ? (totalPaid / totalAmount * 100).toFixed(1) : 0;
+        return `نسبة التحصيل: ${stat(rate + '%')}
+            <ul class="ai-list">
+                <li>إجمالي المستحقات: ${stat(fmtCurrency(totalAmount))}</li>
+                <li>تم تحصيله: ${stat(fmtCurrency(totalPaid))}</li>
+                <li>المتبقي: ${stat(fmtCurrency(totalRem))}</li>
+            </ul>`;
+    }
+
+    // ===== الماركات =====
+    if (/أكثر.*ماركة|ماركات|أنواع السيارات/.test(q)) {
+        const brands = {};
+        allVehicles.forEach(v => { if (v.brand) brands[v.brand] = (brands[v.brand] || 0) + 1; });
+        const sorted = Object.entries(brands).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        let html = `أكثر ${stat(sorted.length)} ماركات في الأسطول:<ul class="ai-list">`;
+        sorted.forEach((b, i) => {
+            const pct = (b[1] / allVehicles.length * 100).toFixed(1);
+            html += `<li><strong>${i+1}.</strong> ${b[0]} — ${stat(b[1])} سيارة (${pct}%)</li>`;
+        });
+        html += '</ul>';
+        return html;
+    }
+
+    // ===== المالك =====
+    const ownerMatch = q.match(/(?:مالك|المالك)\s+(.+?)(?:\?|$|كم|عند)/);
+    if (ownerMatch || /سيارات.*(عند|لـ|للمالك)/.test(q)) {
+        let ownerSearch = ownerMatch ? ownerMatch[1].trim() : '';
+        if (!ownerSearch) {
+            const m = q.match(/(?:عند|لـ|للمالك)\s+(.+?)(?:\?|$)/);
+            if (m) ownerSearch = m[1].trim();
+        }
+        if (ownerSearch) {
+            const matches = allVehicles.filter(v => v.owner && v.owner.toLowerCase().includes(ownerSearch.toLowerCase()));
+            if (matches.length === 0) return `لم أجد مالكًا باسم "${ownerSearch}" في السجل.`;
+            const owner = matches[0].owner;
+            const total = matches.reduce((a, v) => a + v.totalAmount, 0);
+            const paid = matches.reduce((a, v) => a + v.paid, 0);
+            const rem = matches.reduce((a, v) => a + v.remaining, 0);
+            return `المالك ${stat(owner)} لديه ${stat(matches.length)} سيارة:
+                <ul class="ai-list">
+                    <li>إجمالي المستحقات: ${stat(fmtCurrency(total))}</li>
+                    <li>المدفوع: ${stat(fmtCurrency(paid))}</li>
+                    <li>المتبقي: ${stat(fmtCurrency(rem))}</li>
+                </ul>`;
+        }
+    }
+
+    // ===== سيارة محددة (رقم لوحة) =====
+    const plateMatch = q.match(/[أ-ي]\s*[أ-ي]\s*[أ-ي]\s*\d{3,4}/);
+    if (plateMatch) {
+        const plate = plateMatch[0];
+        const v = allVehicles.find(x => x.plate.replace(/\s/g, '') === plate.replace(/\s/g, ''));
+        if (!v) {
+            return `لم أجد سيارة برقم "${plate}". تأكد من رقم اللوحة.`;
+        }
+        return `معلومات السيارة ${stat(v.plate)}:
+            <ul class="ai-list">
+                <li>المستخدم: ${v.userName || 'غير محدد'}</li>
+                <li>المالك: ${v.owner || 'غير محدد'}</li>
+                <li>الماركة/الطراز: ${v.brand} ${v.model}</li>
+                <li>الجوال: ${v.phone || 'غير مسجل'}</li>
+                <li>انتهاء الرخصة: ${fmtDate(v.licenseExpiry)} ${v.licenseExpired ? '❌ منتهية' : (v.licenseSoon ? '⏰ قريبة' : '✓')}</li>
+                <li>المستحقات: ${stat(fmtCurrency(v.totalAmount))} • المدفوع: ${stat(fmtCurrency(v.paid))} • المتبقي: ${stat(fmtCurrency(v.remaining))}</li>
+                <li>عدد الطلبات: ${stat(v.orders.length)}</li>
+            </ul>`;
+    }
+
+    // ===== الطلبات =====
+    if (/كم طلب|عدد الطلبات/.test(q)) {
+        const annual = allOrders.filter(o => o.type === 'سنوية').length;
+        const other = allOrders.filter(o => o.type === 'أخرى').length;
+        return `لديك ${stat(allOrders.length)} طلب: ${stat(annual)} سنوية و ${stat(other)} خدمات أخرى.`;
+    }
+
+    if (/طلب.*(لم|غير).*(مدفوع|سدد)/.test(q) || /طلبات.*متأخرة/.test(q)) {
+        const unpaid = allOrders.filter(o => o.payStatus === 'unpaid');
+        const remaining = unpaid.reduce((a, o) => a + o.remaining, 0);
+        return `يوجد ${stat(unpaid.length)} طلب غير مدفوع بإجمالي ${stat(fmtCurrency(remaining))}.`;
+    }
+
+    // ===== سيارات بلا طلبات =====
+    if (/بلا طلب|بدون طلب|لم تسجل/.test(q)) {
+        const noOrders = allVehicles.filter(v => v.orders.length === 0);
+        if (noOrders.length === 0) return `✓ كل السيارات لها طلبات مسجلة.`;
+        let html = `يوجد ${stat(noOrders.length)} سيارة بلا طلبات`;
+        if (noOrders.length <= 10) {
+            html += ':<ul class="ai-list">';
+            noOrders.forEach(v => html += `<li>${v.plate} — ${v.userName || 'بدون اسم'}</li>`);
+            html += '</ul>';
+        }
+        return html;
+    }
+
+    // ===== المساعدة =====
+    if (/مساعدة|كيف|ماذا تستطيع|ايش تقدر/.test(q)) {
+        return `يمكنني الإجابة عن أسئلة مثل:
+            <ul class="ai-list">
+                <li>كم سيارة لدي؟ كم نشطة؟</li>
+                <li>كم رصيد مؤيد؟ كم يستحق هشام؟</li>
+                <li>أعلى 5 عملاء عليهم متبقي</li>
+                <li>سيارات بدون جوال / بدون اسم</li>
+                <li>رخص ستنتهي خلال شهر</li>
+                <li>سيارات المالك [اسم]</li>
+                <li>معلومات السيارة [رقم اللوحة]</li>
+                <li>إجمالي أرباح السنوية</li>
+                <li>أكثر الماركات في الأسطول</li>
+                <li>نسبة التحصيل</li>
+            </ul>`;
+    }
+
+    // ===== لم نفهم =====
+    return `لم أفهم السؤال بدقة. جرّب صياغة أخرى، أو اضغط على أحد الاقتراحات أعلاه. مثلاً:
+        <ul class="ai-list">
+            <li>"كم سيارة لدي؟"</li>
+            <li>"رصيد مؤيد"</li>
+            <li>"أعلى 5 متأخرين"</li>
+        </ul>`;
+}
+
+// =================== اختصارات لوحة المفاتيح ===================
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f' && allVehicles.length > 0) {
+        e.preventDefault();
+        const input = currentMainTab === 'orders' ? 'ordersSearch' :
+                      currentMainTab === 'receivables' ? 'receivablesSearch' : 'vehiclesSearch';
+        document.getElementById(input).focus();
+    }
+});
+
+console.log('✓ لوحة قيادة المركبات والطلبات جاهزة');
+</script>
+
+</body>
+</html>
